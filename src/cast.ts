@@ -23,6 +23,8 @@ export interface Drawable {
   surface(): CastSurface;
 }
 
+const TEXT_RESOLUTION = 4;
+
 function createCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
 
@@ -30,6 +32,17 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   canvas.height = Math.max(1, height);
 
   return canvas;
+}
+
+function createTextContext(width: number, height: number): CanvasRenderingContext2D {
+  const canvasWidth = width * TEXT_RESOLUTION;
+  const canvasHeight = height * TEXT_RESOLUTION;
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+  context.scale(TEXT_RESOLUTION, TEXT_RESOLUTION);
+
+  return context;
 }
 
 function isRowOpaque(mask: Uint8Array, width: number, row: number): boolean {
@@ -125,6 +138,45 @@ export class BitmapCast implements Drawable {
   }
 }
 
+export class QuarterCast implements Drawable {
+  readonly name: string;
+  readonly width: number;
+  readonly height: number;
+  readonly hotspotX: number;
+  readonly hotspotY: number;
+  private readonly full: BitmapCast;
+  private readonly quarter: BitmapCast;
+
+  constructor(name: string, full: DecodedBitmap, quarter: DecodedBitmap) {
+    this.name = name;
+    this.full = new BitmapCast(name, full);
+    this.quarter = new BitmapCast(name, quarter);
+    this.width = this.quarter.width;
+    this.height = this.quarter.height;
+    this.hotspotX = this.quarter.hotspotX;
+    this.hotspotY = this.quarter.hotspotY;
+  }
+
+  get mode(): number {
+    return this.quarter.mode;
+  }
+
+  set mode(mode: number) {
+    this.full.mode = mode;
+    this.quarter.mode = mode;
+  }
+
+  surface(): CastSurface {
+    const fullSurface = this.full.surface();
+    const quarterSurface = this.quarter.surface();
+    const canvas = fullSurface.canvas;
+    const mask = quarterSurface.mask;
+    const bbox = quarterSurface.bbox;
+
+    return { canvas, mask, bbox };
+  }
+}
+
 export class ScaledCast implements Drawable {
   readonly name: string;
   readonly width: number;
@@ -157,14 +209,9 @@ export class ScaledCast implements Drawable {
       return this.cachedSurface;
     }
 
-    const sourceCanvas = this.source.surface().canvas;
-    const canvas = createCanvas(this.width, this.height);
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const canvas = this.source.surface().canvas;
     const bbox = { l: 0, t: 0, r: this.width, b: this.height };
 
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = "high";
-    context.drawImage(sourceCanvas, 0, 0, this.width, this.height);
     this.cachedSurface = { canvas, mask: null, bbox };
 
     return this.cachedSurface;
@@ -252,8 +299,8 @@ export class ButtonCast implements Drawable {
       return this.cachedSurface;
     }
 
-    const canvas = createCanvas(this.width, this.height);
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = createTextContext(this.width, this.height);
+    const canvas = context.canvas;
     const bbox = { l: 0, t: 0, r: this.width, b: this.height };
 
     this.drawFrame(context);
@@ -333,8 +380,8 @@ export class TextCast implements Drawable {
     this.hotspotX = width >> 1;
     this.hotspotY = height >> 1;
     this.mode = mode;
-    this.canvas = createCanvas(width, height);
-    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.context = createTextContext(width, height);
+    this.canvas = this.context.canvas;
   }
 
   clear(): void {

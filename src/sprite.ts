@@ -801,15 +801,22 @@ export class Sprite {
 
     const width = visibleArea.r - visibleArea.l;
     const height = visibleArea.b - visibleArea.t;
-    const sourceX = visibleArea.l - offsetX;
-    const sourceY = visibleArea.t - offsetY;
+    const scaleX = surface.canvas.width / cast.width;
+    const scaleY = surface.canvas.height / cast.height;
+    const sourceX = (visibleArea.l - offsetX) * scaleX;
+    const sourceY = (visibleArea.t - offsetY) * scaleY;
+    const sourceWidth = width * scaleX;
+    const sourceHeight = height * scaleY;
+    const isScaled = scaleX !== 1 || scaleY !== 1;
 
+    context.imageSmoothingEnabled = isScaled;
+    context.imageSmoothingQuality = "high";
     context.drawImage(
       surface.canvas,
       sourceX,
       sourceY,
-      width,
-      height,
+      sourceWidth,
+      sourceHeight,
       visibleArea.l,
       visibleArea.t,
       width,

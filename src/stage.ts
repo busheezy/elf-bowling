@@ -254,6 +254,7 @@ export class Stage {
 
     const scene = this.current;
 
+    this.syncResolution();
     this.context.fillStyle = "#000";
     this.context.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
 
@@ -264,6 +265,25 @@ export class Stage {
     scene.logic();
     this.updateModal();
     scene.draw(this.context);
+  }
+
+  private syncResolution(): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const pixelRatio = window.devicePixelRatio;
+    const width = Math.max(STAGE_WIDTH, Math.round(rect.width * pixelRatio));
+    const height = Math.max(STAGE_HEIGHT, Math.round(rect.height * pixelRatio));
+    const isResized = this.canvas.width !== width || this.canvas.height !== height;
+
+    if (isResized) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+    }
+
+    const scaleX = width / STAGE_WIDTH;
+    const scaleY = height / STAGE_HEIGHT;
+
+    this.context.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+    this.context.imageSmoothingEnabled = false;
   }
 
   private toStage(event: PointerEvent): [number, number] {

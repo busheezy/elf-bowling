@@ -1,5 +1,5 @@
 import { decodeBitmap, mirrorBitmap, shrinkBitmap, type DecodedBitmap } from "./bitmap";
-import { BitmapCast } from "./cast";
+import { BitmapCast, QuarterCast, type Drawable } from "./cast";
 import type { KnockTables } from "./knockdown";
 import embeddedData from "./assets/data.json";
 
@@ -50,7 +50,7 @@ export class Assets {
   readonly layout: LayoutRecord[];
   readonly data: GameData;
   private readonly bitmaps = new Map<string, DecodedBitmap>();
-  private readonly casts = new Map<string, BitmapCast>();
+  private readonly casts = new Map<string, Drawable>();
   private readonly sounds = new Map<string, AudioBuffer>();
 
   private constructor(embedded: EmbeddedData) {
@@ -101,7 +101,7 @@ export class Assets {
     this.bitmaps.set(file, bitmap);
   }
 
-  cast(name: string): BitmapCast {
+  cast(name: string): Drawable {
     const key = name.toLowerCase();
     const cached = this.casts.get(key);
 
@@ -109,12 +109,24 @@ export class Assets {
       return cached;
     }
 
-    const bitmap = this.resolveBitmap(key);
-    const created = new BitmapCast(name, bitmap);
+    const created = this.createCast(name, key);
 
     this.casts.set(key, created);
 
     return created;
+  }
+
+  private createCast(name: string, key: string): Drawable {
+    const bitmap = this.resolveBitmap(key);
+    const isQuarter = key.startsWith(QUARTER_PREFIX);
+
+    if (!isQuarter) {
+      return new BitmapCast(name, bitmap);
+    }
+
+    const fullSize = this.resolveBitmap(key.slice(1));
+
+    return new QuarterCast(name, fullSize, bitmap);
   }
 
   private resolveBitmap(key: string): DecodedBitmap {
