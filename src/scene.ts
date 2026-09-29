@@ -5,8 +5,6 @@ import type { Stage } from "./stage";
 
 export type KeyHandler = (key: KeyboardEvent) => void;
 
-const MAX_TICKS_PER_FRAME = 3;
-
 function matchesPattern(name: string, pattern: string): boolean {
   if (name.length !== pattern.length) {
     return false;
@@ -116,14 +114,13 @@ export abstract class Scene {
 
   logic(): void {
     const elapsedTicks = Math.trunc((this.now - this.startTime) / this.tickPeriod);
-    const backlog = elapsedTicks - this.ticksDone;
-    const ticks = Math.min(MAX_TICKS_PER_FRAME, backlog);
+    const ticks = elapsedTicks - this.ticksDone;
 
     for (let tick = 0; tick < ticks; tick++) {
       this.tick();
     }
 
-    this.ticksDone = Math.max(this.ticksDone, elapsedTicks);
+    this.ticksDone = elapsedTicks;
   }
 
   private tick(): void {
