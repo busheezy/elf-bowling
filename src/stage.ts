@@ -12,6 +12,7 @@ const PRIMARY_BUTTON = 0;
 const GAME_KEYS = new Set(["Enter", " ", "Escape"]);
 const CHEAT_KEYS = new Set(["x", "d", "s", "g", "n"]);
 const MUTE_KEY = "m";
+const FULLSCREEN_KEY = "f";
 
 function isGameKey(event: KeyboardEvent): boolean {
   const isPlainKey = GAME_KEYS.has(event.key);
@@ -31,11 +32,20 @@ export interface Modal {
   onKeyDown: KeyHandler;
 }
 
-function isMuteKey(event: KeyboardEvent): boolean {
+function isPlainKeyPress(event: KeyboardEvent, expected: string): boolean {
   const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
   const key = event.key.toLowerCase();
 
-  return !hasModifier && key === MUTE_KEY;
+  return !hasModifier && key === expected;
+}
+
+async function toggleFullscreen(): Promise<void> {
+  if (document.fullscreenElement) {
+    await document.exitFullscreen();
+    return;
+  }
+
+  await document.documentElement.requestFullscreen();
 }
 
 export class Stage {
@@ -236,6 +246,16 @@ export class Stage {
     this.now += elapsed;
   }
 
+  private updateCursor(scene: Scene): void {
+    const sprites = this.modal ? this.modal.sprites : scene.sprites;
+    const x = this.mouseX;
+    const y = this.mouseY;
+    const isOverClickable = sprites.some((sprite) => sprite.isClickableAt(x, y));
+    const cursor = isOverClickable ? "pointer" : "";
+
+    this.canvas.style.cursor = cursor;
+  }
+
   private updateModal(): void {
     const modal = this.modal;
 
@@ -269,6 +289,7 @@ export class Stage {
 
     scene.logic();
     this.updateModal();
+    this.updateCursor(scene);
     scene.draw(this.frameContext);
     this.presentFrame();
   }
@@ -386,9 +407,15 @@ export class Stage {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    if (isMuteKey(event)) {
+    if (isPlainKeyPress(event, MUTE_KEY)) {
       event.preventDefault();
       this.toggleMuteOnce(event);
+      return;
+    }
+
+    if (isPlainKeyPress(event, FULLSCREEN_KEY)) {
+      event.preventDefault();
+      this.toggleFullscreenOnce(event);
       return;
     }
 
@@ -420,6 +447,14 @@ export class Stage {
     }
 
     return scene.onKeyDown;
+  }
+
+  private toggleFullscreenOnce(event: KeyboardEvent): void {
+    if (event.repeat) {
+      return;
+    }
+
+    toggleFullscreen().catch(() => undefined);
   }
 
   private toggleMuteOnce(event: KeyboardEvent): void {

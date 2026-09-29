@@ -865,6 +865,22 @@ export class Sprite {
     this.onOutOfBounds = null;
   }
 
+  protected get handlesClicks(): boolean {
+    return this.clickable;
+  }
+
+  isClickableAt(x: number, y: number): boolean {
+    const isInteractive = this.visible && this.enabled && this.onClick !== null;
+
+    if (!isInteractive || !this.handlesClicks) {
+      return false;
+    }
+
+    const rect = this.drawRect();
+
+    return rectContains(rect, x, y);
+  }
+
   handleInput(): void {
     if (!this.clickable) {
       return;

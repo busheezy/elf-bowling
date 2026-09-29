@@ -25,6 +25,10 @@ export class Button extends Sprite {
     this.silent = name === null;
   }
 
+  protected override get handlesClicks(): boolean {
+    return true;
+  }
+
   override reset(): void {
     super.reset();
     this.hover = false;
