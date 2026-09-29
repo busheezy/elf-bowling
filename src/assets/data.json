@@ -1,0 +1,1169 @@
+{
+  "layout": [
+    {
+      "name": "xNVDMessHdr",
+      "x": 320,
+      "y": 270,
+      "flags": 1
+    },
+    {
+      "name": "xNVDLogo",
+      "x": 320,
+      "y": 200,
+      "flags": 257
+    },
+    {
+      "name": "Base00",
+      "x": 16,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base01",
+      "x": 48,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base02",
+      "x": 80,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base03",
+      "x": 112,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base04",
+      "x": 144,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base05",
+      "x": 176,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base06",
+      "x": 208,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base07",
+      "x": 240,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base08",
+      "x": 272,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base09",
+      "x": 304,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base10",
+      "x": 336,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base11",
+      "x": 368,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base12",
+      "x": 400,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base13",
+      "x": 432,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base14",
+      "x": 464,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base15",
+      "x": 496,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base16",
+      "x": 528,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base17",
+      "x": 560,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base18",
+      "x": 592,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base19",
+      "x": 624,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "MountainsR",
+      "x": 532,
+      "y": 107,
+      "flags": 1
+    },
+    {
+      "name": "MountainsC",
+      "x": 319,
+      "y": 129,
+      "flags": 1
+    },
+    {
+      "name": "MountainsL",
+      "x": 107,
+      "y": 107,
+      "flags": 1
+    },
+    {
+      "name": "SantaWalkBack",
+      "x": 112,
+      "y": 189,
+      "flags": 513
+    },
+    {
+      "name": "Circle",
+      "x": 100,
+      "y": 128,
+      "flags": 513
+    },
+    {
+      "name": "Copyright",
+      "x": 304,
+      "y": 197,
+      "flags": 1
+    },
+    {
+      "name": "BLogo",
+      "x": 340,
+      "y": 130,
+      "flags": 257
+    },
+    {
+      "name": "NStormx",
+      "x": 320,
+      "y": 37,
+      "flags": 1
+    },
+    {
+      "name": "Scroll",
+      "x": 325,
+      "y": 310,
+      "flags": 1
+    },
+    {
+      "name": "Elf00 Body",
+      "x": 80,
+      "y": 380,
+      "flags": 513
+    },
+    {
+      "name": "Elf00",
+      "x": 80,
+      "y": 380,
+      "flags": 257
+    },
+    {
+      "name": "Elf00 Arms",
+      "x": 80,
+      "y": 380,
+      "flags": 513
+    },
+    {
+      "name": "Elf01 Body",
+      "x": 570,
+      "y": 380,
+      "flags": 513
+    },
+    {
+      "name": "Elf01",
+      "x": 570,
+      "y": 380,
+      "flags": 257
+    },
+    {
+      "name": "Elf01 Arms",
+      "x": 570,
+      "y": 380,
+      "flags": 513
+    },
+    {
+      "name": "Lights00",
+      "x": 320,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "Lights02",
+      "x": -26,
+      "y": 223,
+      "flags": 257
+    },
+    {
+      "name": "Lights03",
+      "x": 670,
+      "y": 250,
+      "flags": 257
+    },
+    {
+      "name": "IntroQuit",
+      "x": 400,
+      "y": 429,
+      "flags": 1
+    },
+    {
+      "name": "IntroRules",
+      "x": 320,
+      "y": 429,
+      "flags": 1
+    },
+    {
+      "name": "IntroPlay",
+      "x": 240,
+      "y": 429,
+      "flags": 1
+    },
+    {
+      "name": "RightSceneR",
+      "x": 560,
+      "y": 280,
+      "flags": 1
+    },
+    {
+      "name": "RightSceneL",
+      "x": 400,
+      "y": 280,
+      "flags": 1
+    },
+    {
+      "name": "RightBall00",
+      "x": 320,
+      "y": 240,
+      "flags": 256
+    },
+    {
+      "name": "RightBall01",
+      "x": 320,
+      "y": 240,
+      "flags": 256
+    },
+    {
+      "name": "RightBall02",
+      "x": 320,
+      "y": 240,
+      "flags": 256
+    },
+    {
+      "name": "RightBall03",
+      "x": 320,
+      "y": 240,
+      "flags": 256
+    },
+    {
+      "name": "RightBall04",
+      "x": 320,
+      "y": 240,
+      "flags": 256
+    },
+    {
+      "name": "Rake",
+      "x": 480,
+      "y": -170,
+      "flags": 257
+    },
+    {
+      "name": "LeftSceneL",
+      "x": 80,
+      "y": 332,
+      "flags": 1
+    },
+    {
+      "name": "LeftSceneR",
+      "x": 240,
+      "y": 332,
+      "flags": 1
+    },
+    {
+      "name": "xMarker",
+      "x": 160,
+      "y": 370,
+      "flags": 257
+    },
+    {
+      "name": "LeftBall00",
+      "x": 160,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "LeftBall01",
+      "x": 160,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "LeftBall02",
+      "x": 160,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "LeftBall03",
+      "x": 160,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "LeftRake",
+      "x": 160,
+      "y": 122,
+      "flags": 257
+    },
+    {
+      "name": "LeftSceneTopL",
+      "x": 80,
+      "y": 92,
+      "flags": 257
+    },
+    {
+      "name": "LeftSceneTopR",
+      "x": 240,
+      "y": 92,
+      "flags": 257
+    },
+    {
+      "name": "Deer",
+      "x": -45,
+      "y": 240,
+      "flags": 257
+    },
+    {
+      "name": "DeerHead",
+      "x": -45,
+      "y": 240,
+      "flags": 257
+    },
+    {
+      "name": "DeerBall",
+      "x": -50,
+      "y": 240,
+      "flags": 257
+    },
+    {
+      "name": "Turd00",
+      "x": -50,
+      "y": 240,
+      "flags": 513
+    },
+    {
+      "name": "Turd01",
+      "x": -50,
+      "y": 240,
+      "flags": 513
+    },
+    {
+      "name": "Turd02",
+      "x": -70,
+      "y": 240,
+      "flags": 513
+    },
+    {
+      "name": "Kalvin",
+      "x": -32,
+      "y": 310,
+      "flags": 257
+    },
+    {
+      "name": "Bird",
+      "x": -40,
+      "y": 140,
+      "flags": 257
+    },
+    {
+      "name": "LeftBall04",
+      "x": 160,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "BackWallR",
+      "x": 560,
+      "y": 40,
+      "flags": 257
+    },
+    {
+      "name": "BackWallL",
+      "x": 400,
+      "y": 40,
+      "flags": 257
+    },
+    {
+      "name": "BlackLine",
+      "x": 320,
+      "y": 240,
+      "flags": 1
+    },
+    {
+      "name": "PinsBoard",
+      "x": 320,
+      "y": 440,
+      "flags": 1
+    },
+    {
+      "name": "BallMarker0",
+      "x": 286,
+      "y": 473,
+      "flags": 1
+    },
+    {
+      "name": "BallMarker1",
+      "x": 300,
+      "y": 473,
+      "flags": 1
+    },
+    {
+      "name": "ElfMarker00",
+      "x": 352,
+      "y": 410,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker01",
+      "x": 331,
+      "y": 410,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker02",
+      "x": 310,
+      "y": 410,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker03",
+      "x": 289,
+      "y": 410,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker04",
+      "x": 341,
+      "y": 430,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker05",
+      "x": 320,
+      "y": 430,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker06",
+      "x": 299,
+      "y": 430,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker07",
+      "x": 330,
+      "y": 449,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker08",
+      "x": 309,
+      "y": 449,
+      "flags": 257
+    },
+    {
+      "name": "ElfMarker09",
+      "x": 318,
+      "y": 469,
+      "flags": 257
+    },
+    {
+      "name": "Scoreboard",
+      "x": 317,
+      "y": 66,
+      "flags": 257
+    },
+    {
+      "name": "LightsOn",
+      "x": 317,
+      "y": 66,
+      "flags": 257
+    },
+    {
+      "name": "Score00",
+      "x": 177,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score01",
+      "x": 207,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score02",
+      "x": 237,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score03",
+      "x": 267,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score04",
+      "x": 297,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score05",
+      "x": 327,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score06",
+      "x": 357,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score07",
+      "x": 387,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score08",
+      "x": 417,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Score09",
+      "x": 447,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "Santa",
+      "x": 100,
+      "y": 610,
+      "flags": 513
+    },
+    {
+      "name": "Quit",
+      "x": 507,
+      "y": 66,
+      "flags": 1
+    },
+    {
+      "name": "Hint1a",
+      "x": 166,
+      "y": 335,
+      "flags": 256
+    },
+    {
+      "name": "NVDMess2",
+      "x": 320,
+      "y": 296,
+      "flags": 1
+    },
+    {
+      "name": "NVDMessHdr",
+      "x": 320,
+      "y": 156,
+      "flags": 1
+    },
+    {
+      "name": "NVDAddress",
+      "x": 427,
+      "y": 68,
+      "flags": 1
+    },
+    {
+      "name": "NVDLogo",
+      "x": 203,
+      "y": 68,
+      "flags": 257
+    },
+    {
+      "name": "ReturnButton",
+      "x": 600,
+      "y": 445,
+      "flags": 1
+    },
+    {
+      "name": "Base00",
+      "x": 16,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base01",
+      "x": 48,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base02",
+      "x": 80,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base03",
+      "x": 112,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base04",
+      "x": 144,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base05",
+      "x": 176,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base06",
+      "x": 208,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base07",
+      "x": 240,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base08",
+      "x": 272,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base09",
+      "x": 304,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base10",
+      "x": 336,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base11",
+      "x": 368,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base12",
+      "x": 400,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base13",
+      "x": 432,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base14",
+      "x": 464,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base15",
+      "x": 496,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base16",
+      "x": 528,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base17",
+      "x": 560,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base18",
+      "x": 592,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "Base19",
+      "x": 624,
+      "y": 347,
+      "flags": 1
+    },
+    {
+      "name": "MountainsR",
+      "x": 532,
+      "y": 107,
+      "flags": 1
+    },
+    {
+      "name": "MountainsC",
+      "x": 319,
+      "y": 129,
+      "flags": 1
+    },
+    {
+      "name": "MountainsL",
+      "x": 107,
+      "y": 107,
+      "flags": 1
+    },
+    {
+      "name": "MouseElf1",
+      "x": 253,
+      "y": 278,
+      "flags": 257
+    },
+    {
+      "name": "MouseElf2",
+      "x": 390,
+      "y": 277,
+      "flags": 257
+    },
+    {
+      "name": "MouseElf3",
+      "x": 320,
+      "y": 268,
+      "flags": 257
+    },
+    {
+      "name": "NStorm",
+      "x": 210,
+      "y": 32,
+      "flags": 1
+    },
+    {
+      "name": "BLogo2",
+      "x": 320,
+      "y": 139,
+      "flags": 257
+    },
+    {
+      "name": "ExitPlay",
+      "x": 76,
+      "y": 260,
+      "flags": 1
+    },
+    {
+      "name": "ExitRules",
+      "x": 120,
+      "y": 230,
+      "flags": 1
+    },
+    {
+      "name": "ExitQuit",
+      "x": 161,
+      "y": 260,
+      "flags": 1
+    },
+    {
+      "name": "xMas",
+      "x": 320,
+      "y": 380,
+      "flags": 1
+    },
+    {
+      "name": "nstormcom",
+      "x": 120,
+      "y": 292,
+      "flags": 1
+    },
+    {
+      "name": "planet",
+      "x": 452,
+      "y": 36,
+      "flags": 1
+    },
+    {
+      "name": "Elfx01 Body",
+      "x": 320,
+      "y": 270,
+      "flags": 513
+    },
+    {
+      "name": "Elfx01",
+      "x": 320,
+      "y": 270,
+      "flags": 257
+    },
+    {
+      "name": "Elfx01 Arms",
+      "x": 320,
+      "y": 270,
+      "flags": 513
+    },
+    {
+      "name": "Elfx00 Body",
+      "x": 390,
+      "y": 280,
+      "flags": 513
+    },
+    {
+      "name": "Elfx00",
+      "x": 390,
+      "y": 280,
+      "flags": 257
+    },
+    {
+      "name": "Elfx00 Arms",
+      "x": 390,
+      "y": 280,
+      "flags": 513
+    },
+    {
+      "name": "Elfx02 Body",
+      "x": 250,
+      "y": 280,
+      "flags": 513
+    },
+    {
+      "name": "Elfx02",
+      "x": 250,
+      "y": 280,
+      "flags": 257
+    },
+    {
+      "name": "Elfx02 Arms",
+      "x": 250,
+      "y": 280,
+      "flags": 513
+    },
+    {
+      "name": "BigRedButton",
+      "x": 523,
+      "y": 307,
+      "flags": 257
+    },
+    {
+      "name": "DaScore",
+      "x": 523,
+      "y": 225,
+      "flags": 1
+    },
+    {
+      "name": "ScorePadTextr2",
+      "x": 525,
+      "y": 330,
+      "flags": 513
+    },
+    {
+      "name": "ElfCrew",
+      "x": 320,
+      "y": 180,
+      "flags": 0
+    },
+    {
+      "name": "Lights00",
+      "x": 320,
+      "y": 510,
+      "flags": 257
+    },
+    {
+      "name": "Lights02",
+      "x": -26,
+      "y": 223,
+      "flags": 257
+    },
+    {
+      "name": "Lights03",
+      "x": 670,
+      "y": 250,
+      "flags": 257
+    }
+  ],
+  "data": {
+    "credits": {
+      "intro": [
+        "#Another killer game from some of the folks at NVision Design",
+        " ",
+        "It has been another crazy month at NVision Design.  The seasons have changed and so have we.",
+        "NVD continues to be one of the top new media shops here in Dallas, as we sharpen our skills,",
+        "add another year to our belt, and push the proverbial envelope.  In addition to the crew shown",
+        "above, special thanks to the others at NVD: Dax, Don, Andy, Angel, Anna, Brian, Doug, Jacob,",
+        "Jake, James, Janet, Lauren, Mark, Matthew, Mike, Michelle, Mollie, Nathan, Nick, Patrick,",
+        "Risa, Vernon, Vertima, and Donna.",
+        " ",
+        "Thanks go out to those who truly are the *Pirates of the Silicon Prairie.*",
+        " ",
+        "#Click on any of the heads above to get additional credits and messages."
+      ],
+      "crewCredits": [
+        [
+          "#Michael *Bull* Bielinski - Initial Concept, Lead, C++ Programming",
+          "Thanks to Ferg and Dax for being great business partners.  Thanks to the Frogapult fans",
+          "and development team for pulling me out of a slump.  I'm back, Baby!!!  Where's Dan's ELO CD?",
+          " ",
+          "#Dan *Ferg* Ferguson - Creative Direction, Artwork, Concepting",
+          "Thanks Mom, Dad, Leah, Lisa and all of my close friends for putting up with my antics. I'm going",
+          "to be an uncle in a few days! It isn't work when I'm jammin' to Jason Faulkner, Tripping Daisy,",
+          "Stereolab, Fat Boy Slim, The Freshmaka, Supergrass and Pavement! And thanks to Mike and Dax,",
+          "two business partners that are my closest brothers. Hey Frito, bring back nacho cheese Cheetos!"
+        ],
+        [
+          "#Matt *Worm* Johnson - Team Management, Concepting, Voice Talent, Storyline",
+          "Worm would like to thank the whole NVD crew for their vision and dedication.  Without the",
+          "countless hours of research, development and testing (hey... making the perfect",
+          "frogImpaleSpikes.wav sound isn't easy!) none of this would be possible.  See you in 2000.",
+          " ",
+          "#Brandon *Broccoli Bite* Culpepper - Sound, Voice Talent, Testing",
+          "I would like to thank Stephen, Andy, and Matt for helping me out with the elf sounds.",
+          "I would also like to thank Molly and Anna for putting up with us screaming in the office."
+        ],
+        [
+          "#Stephen *Sonic* Childs - Sound, Voice Talent, Testing",
+          "Mom and Dad I love you; Andy, without you, I wouldn't know what the word friendship meant;",
+          "Christina, thank you for patience and understanding and yes, I bought the screws!",
+          " ",
+          "#Detra *D* Jackson - Project Management and Coordination",
+          "I would like to wish everyone a Merry Christmas",
+          "and may they have a happy New Year!!!!"
+        ],
+        [
+          "#Jason *Spud* Sutterfield - Scoreboard, Web and Database Integration",
+          "I want to shout out to our X-Elf MFT, hey man, dont forget the second goal",
+          "in being a One Minute Manager! And thanks to the cable company for screwing",
+          "up my cable, allowing me ample time to get this project done!",
+          " ",
+          "#David *Frog Man* Vance - Web Design and Integration",
+          "Thanks to all the NStormers who play NStorm games and the NVision Design team for creating",
+          "another kick-ass game.  *We've talked about the future, and we've talked about the past,",
+          "but tomorrow will be yesterday, so what will we do today?*"
+        ],
+        [
+          "#Phil *Fill* Meadows - Web and Database Integration",
+          "Thanks to my wife for putting up with me, Spud and Cameron for their help when I had a",
+          "question, and everyone else at NVD, but especially, thanks to the guy who invented the widget",
+          "in the bottom of the can of Guinness waiting for me at the end of each day! Happy Holidays!",
+          " ",
+          "#*Rickel the Pickel* Gonzales - Creative, Concepting",
+          "Thanks to the Weirdheads for talking, drinking, and thinking with me."
+        ]
+      ],
+      "headX": [195, 242, 137, 97, 151, 327, 36, 370, 82, 285],
+      "headY": [67, 63, 43, 105, 110, 67, 82, 81, 53, 81]
+    },
+    "story": [
+      "An Internet Christmas Story",
+      " ",
+      "'Twas the night before Christmas,",
+      "and at the North Pole,",
+      "Santa's sleigh was packed tight,",
+      "the reindeer ready to go.",
+      " ",
+      "When out in the snow,",
+      "there arose such a clatter,",
+      "St. Nick sprang from the can,",
+      "to see what was the matter.",
+      " ",
+      "\"The elves are on strike!\"",
+      "cried Mrs. Claus with disdain.",
+      "\"What shall we do, Santa?",
+      "C'mon, rack your fat brain!\"",
+      " ",
+      "Santa's face began to sparkle,",
+      "he shouted \"Merry Chistmas to All!\"",
+      "He dashed to the coat closet,",
+      "And grabbed his 16 pound ball.",
+      " ",
+      "Santa began to laugh so hard,",
+      "His stomach was rolling,",
+      "*Come on, you old woman,",
+      "Its time for Elf Bowling...\"",
+      " ",
+      "Yes, Virginia...",
+      "There really is Elf Bowling."
+    ],
+    "rules": [
+      "The Official Elf Bowling Rules",
+      " ",
+      "Trouble brews in the Arctic north.  The recent",
+      "explosion of online Christmas purchases has more",
+      "than doubled the demand on the typically lazy",
+      "workers of the ETMU (Elf Toy Makers Union).",
+      " ",
+      "Under the legal advice of Elliot Elf, the",
+      "union's chief counsel, the elves have decided to",
+      "strike against Santa's Workshop, Inc.",
+      " ",
+      "Upon hearing the news, President Claus knows",
+      "there is only one way to resolve this conflict",
+      "in time for Christmas... Elf Bowling!",
+      " ",
+      "Just press the space bar or click the mouse to",
+      "stop the lane marker where you want Santa to aim",
+      "his jolly ball.  Just like real bowling, you",
+      "will get two chances per frame to knock the lazy",
+      "ass elves out of the picket line and back into",
+      "the workshop.  Just a word of warning, these",
+      "elves will do everything they can to distract,",
+      "tease, and humiliate you in the process.",
+      " ",
+      "Click Play when you're polished",
+      "and ready to Elf Bowl."
+    ],
+    "mirror": [3, 2, 1, 0, 6, 5, 4, 8, 7, 9],
+    "knock": [
+      [
+        [0, 0, 0, 1024, 0, 0, 0, 0, 0, 0],
+        [393224, 0, 0, 1024, 0, 0, 0, 0, 0, 0],
+        [393224, 0, 0, 1024, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 64, 1024, 0, 0, 1024, 0, 0, 0],
+        [0, 64, 64, 1024, 0, 0, 1024, 0, 0, 0],
+        [2097216, 2097216, 0, 1024, 0, 0, 1024, 0, 0, 0]
+      ],
+      [
+        [0, 288, 1024, 64, 0, 256, 1024, 0, 1024, 0],
+        [16, 0, 1024, 64, 256, 256, 1024, 0, 1024, 0],
+        [16, 32, 1024, 64, 256, 256, 1024, 0, 1024, 0]
+      ],
+      [
+        [0, 0, 1024, 64, 0, 1024, 1024, 0, 1024, 1024],
+        [0, 160, 1024, 64, 0, 1024, 1024, 512, 1024, 1024],
+        [0, 32, 1024, 64, 0, 1024, 1024, 0, 1024, 1024]
+      ],
+      [
+        [656, 32, 1024, 320, 640, 1024, 256, 512, 1024, 1024],
+        [656, 32, 1024, 320, 640, 1024, 256, 512, 1024, 1024],
+        [656, 32, 1024, 320, 640, 1024, 256, 512, 1024, 1024]
+      ],
+      [
+        [0, 1024, 1024, 0, 128, 1024, 256, 1024, 1024, 1024],
+        [0, 1024, 1024, 0, 0, 1024, 256, 1024, 1024, 1024],
+        [0, 1024, 1024, 0, 128, 1024, 0, 1024, 1024, 1024]
+      ]
+    ],
+    "fly": [
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 3, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 3, 1, 1, 1, 1, 1, 1]
+      ],
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 2, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 3, 1, 1, 1]
+      ],
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 2, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 2, 1, 1]
+      ],
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      ],
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      ],
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      ]
+    ],
+    "delay": [
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [500, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [500, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [500, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ],
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      ]
+    ],
+    "ballScale": [25, 40, 51, 60, 68, 75, 80, 84, 87, 90, 93, 1000]
+  }
+}
