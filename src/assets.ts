@@ -10,6 +10,7 @@ const assetUrls = import.meta.glob<string>("./assets/*.{bmp,wav}", {
 });
 
 const QUARTER_PREFIX = "#";
+const COPY_PREFIX = "~";
 const QUARTER_FACTOR = 4;
 const MIRROR_SUFFIX = "rx.bmp";
 
@@ -80,6 +81,11 @@ export class Assets {
 
   private async loadAsset(audio: AudioContext, file: string, url: string): Promise<void> {
     const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Could not load ${file} (HTTP ${response.status})`);
+    }
+
     const buffer = await response.arrayBuffer();
     const isSound = file.endsWith(".wav");
 
@@ -116,6 +122,10 @@ export class Assets {
 
     if (direct) {
       return direct;
+    }
+
+    if (key.startsWith(COPY_PREFIX)) {
+      return this.resolveBitmap(key.slice(1));
     }
 
     if (key.startsWith(QUARTER_PREFIX)) {

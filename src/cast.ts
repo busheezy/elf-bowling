@@ -125,6 +125,52 @@ export class BitmapCast implements Drawable {
   }
 }
 
+export class ScaledCast implements Drawable {
+  readonly name: string;
+  readonly width: number;
+  readonly height: number;
+  readonly hotspotX: number;
+  readonly hotspotY: number;
+  private readonly source: Drawable;
+  private cachedSurface: CastSurface | null = null;
+
+  constructor(source: Drawable, width: number, height: number) {
+    this.name = source.name;
+    this.source = source;
+    this.width = width;
+    this.height = height;
+    this.hotspotX = width >> 1;
+    this.hotspotY = height >> 1;
+  }
+
+  get mode(): number {
+    return this.source.mode;
+  }
+
+  set mode(mode: number) {
+    this.source.mode = mode;
+    this.cachedSurface = null;
+  }
+
+  surface(): CastSurface {
+    if (this.cachedSurface) {
+      return this.cachedSurface;
+    }
+
+    const sourceCanvas = this.source.surface().canvas;
+    const canvas = createCanvas(this.width, this.height);
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const bbox = { l: 0, t: 0, r: this.width, b: this.height };
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(sourceCanvas, 0, 0, this.width, this.height);
+    this.cachedSurface = { canvas, mask: null, bbox };
+
+    return this.cachedSurface;
+  }
+}
+
 export interface FontSpec {
   family: string;
   size: number;
@@ -138,13 +184,13 @@ const FONTS: FontSpec[] = [
   { family: "Arial, Helvetica, sans-serif", size: 14, weight: 700, italic: false },
   { family: "Arial, Helvetica, sans-serif", size: 16, weight: 300, italic: false },
   {
-    family: "'Lucida Handwriting', 'Brush Script MT', cursive",
+    family: "'Lucida Handwriting', 'Dancing Script', cursive",
     size: 19,
     weight: 600,
     italic: true,
   },
   {
-    family: "'Lucida Calligraphy', 'Apple Chancery', cursive",
+    family: "'Lucida Calligraphy', 'Cormorant Garamond', cursive",
     size: 19,
     weight: 600,
     italic: true,
@@ -169,6 +215,79 @@ function colorCss(color: number): string {
   const blue = (color >> 16) & 0xff;
 
   return `rgb(${red},${green},${blue})`;
+}
+
+export interface ButtonColors {
+  fill: string;
+  border: string;
+  text: string;
+}
+
+const BUTTON_BORDER_WIDTH = 2;
+const BUTTON_RADIUS = 6;
+
+export class ButtonCast implements Drawable {
+  readonly name: string;
+  readonly width: number;
+  readonly height: number;
+  readonly hotspotX: number;
+  readonly hotspotY: number;
+  mode = 0;
+  private readonly font: number;
+  private readonly colors: ButtonColors;
+  private cachedSurface: CastSurface | null = null;
+
+  constructor(label: string, width: number, height: number, font: number, colors: ButtonColors) {
+    this.name = label;
+    this.width = width;
+    this.height = height;
+    this.hotspotX = width >> 1;
+    this.hotspotY = height >> 1;
+    this.font = font;
+    this.colors = colors;
+  }
+
+  surface(): CastSurface {
+    if (this.cachedSurface) {
+      return this.cachedSurface;
+    }
+
+    const canvas = createCanvas(this.width, this.height);
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const bbox = { l: 0, t: 0, r: this.width, b: this.height };
+
+    this.drawFrame(context);
+    this.drawLabel(context);
+    this.cachedSurface = { canvas, mask: null, bbox };
+
+    return this.cachedSurface;
+  }
+
+  private drawFrame(context: CanvasRenderingContext2D): void {
+    const inset = BUTTON_BORDER_WIDTH / 2;
+    const width = this.width - BUTTON_BORDER_WIDTH;
+    const height = this.height - BUTTON_BORDER_WIDTH;
+
+    context.beginPath();
+    context.roundRect(inset, inset, width, height, BUTTON_RADIUS);
+    context.fillStyle = this.colors.fill;
+    context.fill();
+    context.lineWidth = BUTTON_BORDER_WIDTH;
+    context.strokeStyle = this.colors.border;
+    context.stroke();
+  }
+
+  private drawLabel(context: CanvasRenderingContext2D): void {
+    const font = FONTS[this.font];
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
+
+    context.font = fontCss(font);
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = this.colors.text;
+    context.fillText(this.name, centerX, centerY);
+  }
 }
 
 function wrapLine(context: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {

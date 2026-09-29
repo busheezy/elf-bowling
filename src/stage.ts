@@ -1,12 +1,42 @@
 import type { Assets, LayoutRecord } from "./assets";
-import type { Scene } from "./scene";
+import type { KeyHandler, Scene } from "./scene";
 import { SoundManager } from "./sound";
+import { UNSET, type Sprite } from "./sprite";
 
 const STAGE_WIDTH = 640;
 const STAGE_HEIGHT = 480;
 const NO_POSITION = -1;
 const RAND_MAX = 32768;
-const UNSET = 999999999;
+const MAX_FRAME_MS = 100;
+const PRIMARY_BUTTON = 0;
+const GAME_KEYS = new Set(["Enter", " ", "Escape"]);
+const CHEAT_KEYS = new Set(["x", "d", "s", "g", "n"]);
+const MUTE_KEY = "m";
+
+function isGameKey(event: KeyboardEvent): boolean {
+  const isPlainKey = GAME_KEYS.has(event.key);
+
+  if (!event.ctrlKey) {
+    return isPlainKey;
+  }
+
+  const key = event.key.toLowerCase();
+  const isCheatKey = CHEAT_KEYS.has(key);
+
+  return isCheatKey || isPlainKey;
+}
+
+export interface Modal {
+  sprites: Sprite[];
+  onKeyDown: KeyHandler;
+}
+
+function isMuteKey(event: KeyboardEvent): boolean {
+  const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
+  const key = event.key.toLowerCase();
+
+  return !hasModifier && key === MUTE_KEY;
+}
 
 export class Stage {
   readonly assets: Assets;
@@ -20,6 +50,9 @@ export class Stage {
   upX = NO_POSITION;
   upY = NO_POSITION;
   private mouseDownSeen = false;
+  private lastClock = 0;
+  private modal: Modal | null = null;
+  private readonly audio: AudioContext;
   private readonly context: CanvasRenderingContext2D;
   private readonly scenes = new Map<string, Scene>();
   private readonly layoutByName = new Map<string, LayoutRecord>();
@@ -31,6 +64,7 @@ export class Stage {
   constructor(canvas: HTMLCanvasElement, assets: Assets, audio: AudioContext) {
     this.canvas = canvas;
     this.assets = assets;
+    this.audio = audio;
     this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.sound = new SoundManager(audio, assets, () => this.now);
 
@@ -43,7 +77,33 @@ export class Stage {
     }
 
     this.now = performance.now();
+    this.lastClock = this.now;
     this.attachInput();
+  }
+
+  openModal(modal: Modal): void {
+    this.modal = modal;
+    this.consumeDown();
+    this.consumeUp();
+    void this.syncAudio();
+  }
+
+  closeModal(): void {
+    this.modal = null;
+    this.consumeDown();
+    this.consumeUp();
+    void this.syncAudio();
+  }
+
+  private async syncAudio(): Promise<void> {
+    const shouldSuspend = document.hidden || this.modal !== null;
+
+    if (shouldSuspend) {
+      await this.audio.suspend();
+      return;
+    }
+
+    await this.audio.resume();
   }
 
   get downPending(): boolean {
@@ -159,8 +219,36 @@ export class Stage {
     requestAnimationFrame(frame);
   }
 
+  private advanceClock(): void {
+    const clock = performance.now();
+    const elapsed = Math.min(clock - this.lastClock, MAX_FRAME_MS);
+
+    this.lastClock = clock;
+
+    if (this.modal) {
+      return;
+    }
+
+    this.now += elapsed;
+  }
+
+  private updateModal(): void {
+    const modal = this.modal;
+
+    if (!modal) {
+      return;
+    }
+
+    for (const sprite of modal.sprites) {
+      sprite.handleInput();
+    }
+
+    this.consumeDown();
+    this.consumeUp();
+  }
+
   private step(): void {
-    this.now = performance.now();
+    this.advanceClock();
     this.sound.update();
     this.switchScene();
 
@@ -174,10 +262,11 @@ export class Stage {
     }
 
     scene.logic();
+    this.updateModal();
     scene.draw(this.context);
   }
 
-  private toStage(event: MouseEvent): [number, number] {
+  private toStage(event: PointerEvent): [number, number] {
     const rect = this.canvas.getBoundingClientRect();
     const scaleX = STAGE_WIDTH / rect.width;
     const scaleY = STAGE_HEIGHT / rect.height;
@@ -188,43 +277,112 @@ export class Stage {
   }
 
   private attachInput(): void {
-    this.canvas.addEventListener("mousedown", (event) => {
-      const [x, y] = this.toStage(event);
-
-      this.mouseDownSeen = true;
-      this.downX = x;
-      this.downY = y;
+    this.canvas.addEventListener("pointerdown", (event) => {
+      this.handlePointerDown(event);
     });
 
-    this.canvas.addEventListener("mousemove", (event) => {
+    this.canvas.addEventListener("pointermove", (event) => {
       const [x, y] = this.toStage(event);
 
       this.mouseX = x;
       this.mouseY = y;
     });
 
-    window.addEventListener("mouseup", (event) => {
-      if (!this.mouseDownSeen) {
-        return;
-      }
-
-      const [x, y] = this.toStage(event);
-
-      this.upX = x;
-      this.upY = y;
+    window.addEventListener("pointerup", (event) => {
+      this.handlePointerUp(event);
     });
 
     window.addEventListener("keydown", (event) => {
-      const isShiftEnter = event.key === "Enter" && event.shiftKey;
-      const scene = this.current;
-
-      if (isShiftEnter || !scene || !scene.onKeyDown) {
-        return;
-      }
-
-      event.preventDefault();
-      scene.onKeyDown(event);
+      this.handleKeyDown(event);
     });
+
+    const syncAudio = async () => {
+      await this.syncAudio();
+    };
+
+    document.addEventListener("visibilitychange", syncAudio);
+    window.addEventListener("pointerup", syncAudio);
+    window.addEventListener("keydown", syncAudio);
+  }
+
+  private handlePointerDown(event: PointerEvent): void {
+    if (event.button !== PRIMARY_BUTTON) {
+      return;
+    }
+
+    const [x, y] = this.toStage(event);
+
+    this.mouseDownSeen = true;
+    this.mouseX = x;
+    this.mouseY = y;
+    this.downX = x;
+    this.downY = y;
+  }
+
+  private handlePointerUp(event: PointerEvent): void {
+    const isPrimary = event.button === PRIMARY_BUTTON;
+
+    if (!this.mouseDownSeen || !isPrimary) {
+      return;
+    }
+
+    const [x, y] = this.toStage(event);
+
+    this.mouseDownSeen = false;
+    this.upX = x;
+    this.upY = y;
+
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    this.mouseX = NO_POSITION;
+    this.mouseY = NO_POSITION;
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (isMuteKey(event)) {
+      event.preventDefault();
+      this.toggleMuteOnce(event);
+      return;
+    }
+
+    const isShiftEnter = event.key === "Enter" && event.shiftKey;
+    const handler = this.keyHandler();
+
+    if (isShiftEnter || !handler || !isGameKey(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.repeat) {
+      return;
+    }
+
+    handler(event);
+  }
+
+  private keyHandler(): KeyHandler | null {
+    if (this.modal) {
+      return this.modal.onKeyDown;
+    }
+
+    const scene = this.current;
+
+    if (!scene) {
+      return null;
+    }
+
+    return scene.onKeyDown;
+  }
+
+  private toggleMuteOnce(event: KeyboardEvent): void {
+    if (event.repeat) {
+      return;
+    }
+
+    this.sound.toggleMute();
   }
 
   get currentScene(): Scene | null {

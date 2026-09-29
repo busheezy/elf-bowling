@@ -21,11 +21,34 @@ interface BackgroundLoop {
 
 const DEFAULT_TALK_INTERVAL = 160;
 const BACKGROUND_PRIORITY = 1;
+const MUTED_KEY = "elf-bowling-muted";
+
+function readMuted(): boolean {
+  try {
+    const stored = localStorage.getItem(MUTED_KEY);
+
+    return stored === "1";
+  } catch {
+    return false;
+  }
+}
+
+function storeMuted(muted: boolean): void {
+  const value = muted ? "1" : "0";
+
+  try {
+    localStorage.setItem(MUTED_KEY, value);
+  } catch {
+    return;
+  }
+}
 
 export class SoundManager {
   private readonly audio: AudioContext;
   private readonly assets: Assets;
   private readonly clock: () => number;
+  private readonly output: GainNode;
+  private muted = readMuted();
   private current: Playing | null = null;
   private background: BackgroundLoop | null = null;
 
@@ -33,6 +56,21 @@ export class SoundManager {
     this.audio = audio;
     this.assets = assets;
     this.clock = clock;
+    this.output = audio.createGain();
+    this.output.connect(audio.destination);
+    this.applyVolume();
+  }
+
+  toggleMute(): void {
+    this.muted = !this.muted;
+    storeMuted(this.muted);
+    this.applyVolume();
+  }
+
+  private applyVolume(): void {
+    const volume = this.muted ? 0 : 1;
+
+    this.output.gain.value = volume;
   }
 
   play(
@@ -149,7 +187,7 @@ export class SoundManager {
     const endsAt = this.clock() + durationMs;
 
     source.buffer = buffer;
-    source.connect(this.audio.destination);
+    source.connect(this.output);
     source.start();
 
     this.current = { source, priority, scene, sprite, onDone, talking, endsAt };

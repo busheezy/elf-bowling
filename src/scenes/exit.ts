@@ -1,7 +1,7 @@
 import type { TextCast } from "../cast";
 import { Scene, type Group } from "../scene";
 import { makeRect, type Sprite } from "../sprite";
-import { session } from "../state";
+import { readBestScore, session } from "../state";
 
 const MOUNTAIN_BASES = 20;
 const HOVER_GRACE_MS = 3000;
@@ -10,6 +10,8 @@ const CREDIT_PAGE_MS = 9000;
 const CREDITS_SCROLL_MS = 80;
 const HEAD_HALF_WIDTH = 16;
 const HEAD_HALF_HEIGHT = 21;
+const SCORE_FONT = 1;
+const BEST_FONT = 2;
 const DANCERS = ["Elfx01", "Elfx00", "Elfx02"];
 const MOUSE_ELF_TARGETS: [string, string][] = [
   ["MouseElf1", "Elfx02"],
@@ -149,7 +151,7 @@ export class ExitScene extends Scene {
     const pad = this.addTextSprite("ScorePadTextr2", scoreLabel, 2, 3, 3, 20, -175);
 
     pad.text.color = 0xffff;
-    pad.text.font = 1;
+    pad.text.font = SCORE_FONT;
     this.scorePad = pad.text;
   }
 
@@ -179,9 +181,13 @@ export class ExitScene extends Scene {
 
   protected start(): void {
     const digits = String(Math.min(session.finalScore, 999)).padStart(3, "0");
+    const best = readBestScore();
     const pad = this.find("ScorePadTextr2");
 
+    this.scorePad.font = SCORE_FONT;
     this.scorePad.setText(digits);
+    this.scorePad.font = BEST_FONT;
+    this.scorePad.appendText(`Best ${best}`);
     this.applyParmOffset("ElfCrew", "EggText");
     pad.resetToHome();
     pad.setClipRect(pad.screenRect());

@@ -1,6 +1,6 @@
 import { Button } from "./button";
-import { TextCast, type Rect } from "./cast";
-import { Sprite, type SpriteCallback } from "./sprite";
+import { TextCast, type Drawable, type Rect } from "./cast";
+import { Sprite, UNSET, type SpriteCallback } from "./sprite";
 import type { Stage } from "./stage";
 
 export type KeyHandler = (key: KeyboardEvent) => void;
@@ -122,7 +122,7 @@ export abstract class Scene {
       this.tick();
     }
 
-    this.ticksDone += Math.max(0, ticks);
+    this.ticksDone = Math.max(this.ticksDone, elapsedTicks);
   }
 
   private tick(): void {
@@ -176,6 +176,11 @@ export abstract class Scene {
 
   addSprite(name: string, bitmap: string): Sprite {
     const cast = this.stage.assets.cast(bitmap);
+
+    return this.addSpriteCast(name, cast);
+  }
+
+  addSpriteCast(name: string, cast: Drawable): Sprite {
     const sprite = new Sprite(this, name, cast);
 
     this.sprites.push(sprite);
@@ -198,6 +203,11 @@ export abstract class Scene {
   addButton(name: string, idleBitmap: string, activeBitmap: string): Button {
     const idle = this.stage.assets.cast(idleBitmap);
     const active = this.stage.assets.cast(activeBitmap);
+
+    return this.addButtonCasts(name, idle, active);
+  }
+
+  addButtonCasts(name: string, idle: Drawable, active: Drawable): Button {
     const button = new Button(this, name, idle, active);
 
     this.sprites.push(button);
@@ -271,7 +281,7 @@ export abstract class Scene {
   applyParmOffset(fromName: string, toName: string): void {
     const from = this.find(fromName);
     const to = this.find(toName);
-    const isSet = from.parmOffsetX !== 999999999;
+    const isSet = from.parmOffsetX !== UNSET;
 
     if (!isSet) {
       return;

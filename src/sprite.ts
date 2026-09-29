@@ -4,7 +4,7 @@ import type { Scene } from "./scene";
 export type SpriteCallback = (sprite: Sprite) => void;
 
 export const STAGE_RECT: Rect = { l: 0, t: 0, r: 640, b: 480 };
-const UNSET = 999999999;
+export const UNSET = 999999999;
 const TIMER_SLOTS = 4;
 const MAX_QUEUE = 12;
 

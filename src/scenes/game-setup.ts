@@ -562,7 +562,6 @@ export function buildGameScene(scene: Scene, onQuit: () => void): number[] {
   const quit = scene.addButton("Quit", "QuitOn.bmp", "QuitOff.bmp");
 
   quit.onClick = onQuit;
-  scene.addSprite("Hint1a", "Hint1a.bmp");
 
   return rowThresholds;
 }

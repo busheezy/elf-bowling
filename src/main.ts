@@ -1,3 +1,5 @@
+import "@fontsource/dancing-script/latin-600.css";
+import "@fontsource/cormorant-garamond/latin-600-italic.css";
 import { Assets } from "./assets";
 import { AboutScene } from "./scenes/about";
 import { ExitScene } from "./scenes/exit";
@@ -15,6 +17,13 @@ function showMessage(text: string): void {
   overlay.hidden = false;
 }
 
+async function loadFonts(): Promise<void> {
+  const handwriting = document.fonts.load("600 16px 'Dancing Script'");
+  const calligraphy = document.fonts.load("italic 600 16px 'Cormorant Garamond'");
+
+  await Promise.all([handwriting, calligraphy]);
+}
+
 async function boot(): Promise<void> {
   const audio = new AudioContext();
 
@@ -26,30 +35,30 @@ async function boot(): Promise<void> {
     showMessage(`Loading… ${percent}%`);
   });
 
-  showMessage("Click to play");
+  await loadFonts();
 
-  overlay.onclick = async () => {
-    overlay.hidden = true;
-    overlay.onclick = null;
-    await audio.resume();
+  overlay.hidden = true;
 
-    const stage = new Stage(canvas, assets, audio);
-    const scenes = [
-      new PreIntroScene(stage, "PreIntro", 100),
-      new IntroScene(stage, "Intro", 100),
-      new GameScene(stage, "Game", 100),
-      new AboutScene(stage, "About", 30),
-      new ExitScene(stage, "Exit", 100),
-    ];
+  const stage = new Stage(canvas, assets, audio);
+  const scenes = [
+    new PreIntroScene(stage, "PreIntro", 100),
+    new IntroScene(stage, "Intro", 100),
+    new GameScene(stage, "Game", 100),
+    new AboutScene(stage, "About", 30),
+    new ExitScene(stage, "Exit", 100),
+  ];
 
-    for (const scene of scenes) {
-      stage.register(scene);
-    }
+  for (const scene of scenes) {
+    stage.register(scene);
+  }
 
-    stage.gotoScene("PreIntro");
-    stage.run();
-  };
+  stage.gotoScene("PreIntro");
+  stage.run();
 }
+
+window.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
 
 boot().catch((error: unknown) => {
   const text = error instanceof Error ? error.message : String(error);

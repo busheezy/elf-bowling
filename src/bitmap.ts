@@ -1,4 +1,5 @@
 const KEY_INDEX = 255;
+const COLOR_TOLERANCE = 24;
 
 export interface DecodedBitmap {
   width: number;
@@ -156,9 +157,97 @@ function floodBorderKey(bitmap: DecodedBitmap): Uint8Array {
   return transparent;
 }
 
+function colorDistance(pixels: Uint8ClampedArray, first: number, second: number): number {
+  const firstOffset = first * 4;
+  const secondOffset = second * 4;
+  const red = Math.abs(pixels[firstOffset] - pixels[secondOffset]);
+  const green = Math.abs(pixels[firstOffset + 1] - pixels[secondOffset + 1]);
+  const blue = Math.abs(pixels[firstOffset + 2] - pixels[secondOffset + 2]);
+
+  return Math.max(red, green, blue);
+}
+
+function borderPixels(width: number, height: number): number[] {
+  const pixels: number[] = [];
+
+  for (let column = 0; column < width; column++) {
+    pixels.push(column, (height - 1) * width + column);
+  }
+
+  for (let row = 0; row < height; row++) {
+    pixels.push(row * width, row * width + width - 1);
+  }
+
+  return pixels;
+}
+
+function neighborPixels(pixel: number, width: number, height: number): number[] {
+  const column = pixel % width;
+  const row = (pixel - column) / width;
+  const neighbors: number[] = [];
+
+  if (column > 0) {
+    neighbors.push(pixel - 1);
+  }
+
+  if (column < width - 1) {
+    neighbors.push(pixel + 1);
+  }
+
+  if (row > 0) {
+    neighbors.push(pixel - width);
+  }
+
+  if (row < height - 1) {
+    neighbors.push(pixel + width);
+  }
+
+  return neighbors;
+}
+
+function backgroundSeeds(bitmap: DecodedBitmap): number[] {
+  const { width, height, pixels } = bitmap;
+  const corners = [0, width - 1, (height - 1) * width, width * height - 1];
+  const matchesCorner = (pixel: number) =>
+    corners.some((corner) => colorDistance(pixels, pixel, corner) <= COLOR_TOLERANCE);
+
+  return borderPixels(width, height).filter(matchesCorner);
+}
+
+function floodBorderColor(bitmap: DecodedBitmap): Uint8Array {
+  const { width, height, pixels } = bitmap;
+  const transparent = new Uint8Array(width * height);
+  const stack = backgroundSeeds(bitmap);
+
+  for (const seed of stack) {
+    transparent[seed] = 1;
+  }
+
+  while (stack.length > 0) {
+    const pixel = stack.pop() as number;
+
+    for (const neighbor of neighborPixels(pixel, width, height)) {
+      const isSimilar = colorDistance(pixels, pixel, neighbor) <= COLOR_TOLERANCE;
+
+      if (transparent[neighbor] === 1 || !isSimilar) {
+        continue;
+      }
+
+      transparent[neighbor] = 1;
+      stack.push(neighbor);
+    }
+  }
+
+  return transparent;
+}
+
 export function transparencyMask(bitmap: DecodedBitmap, mode: number): Uint8Array {
   if (mode === 1) {
     return floodBorderKey(bitmap);
+  }
+
+  if (mode === 3) {
+    return floodBorderColor(bitmap);
   }
 
   if (mode === 2) {

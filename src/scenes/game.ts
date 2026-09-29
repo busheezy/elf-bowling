@@ -12,11 +12,13 @@ import {
   type Frame,
 } from "../scoring";
 import { makeRect, type Sprite } from "../sprite";
-import { session } from "../state";
+import { recordBestScore, session } from "../state";
 import { Elves, PIN_COUNT } from "./elves";
 import { buildGameScene } from "./game-setup";
 import { Behavior, ElfBehaviors } from "./game-elves";
 import { Critters } from "./game-critters";
+import { QuitConfirm } from "./game-confirm";
+import { PinSetter } from "./game-pinsetter";
 
 const METER_INTERVAL = 20;
 const METER_MAX = 1400;
@@ -26,10 +28,6 @@ const BALL_START_X = 160;
 const BALL_START_Y = 500;
 const BALL_BOUNDS = makeRect(0, 212, 320, 502);
 const BALL_STEP_MS = 20;
-const RACKER_SPEED = 8000;
-const RACKER_LEFT_SPEED = 2000;
-const RACKER_DROP = 336;
-const LEFT_RACKER_DROP = 84;
 const TAUNT_IDLE_MS = 5000;
 
 function pad2(value: number): string {
@@ -62,6 +60,8 @@ export class GameScene extends Scene {
   elves!: Elves;
   behaviors!: ElfBehaviors;
   critters!: Critters;
+  pinSetter!: PinSetter;
+  private quitConfirm!: QuitConfirm;
   standing: boolean[] = Array.from({ length: PIN_COUNT }, () => true);
   remaining: boolean[] = Array.from({ length: PIN_COUNT }, () => true);
   fellThisBall: boolean[] = Array.from({ length: PIN_COUNT }, () => false);
@@ -101,7 +101,6 @@ export class GameScene extends Scene {
   private idleTaunted = [false, false];
   private tauntPin = 0;
   private tauntIsGutter = false;
-  private hintShown = false;
   private screamDone = false;
 
   protected init(alreadyInitialized: boolean): void {
@@ -116,7 +115,7 @@ export class GameScene extends Scene {
       this.handleThrowInput("Space");
     };
     this.rowThresholds = buildGameScene(this, () => {
-      this.stage.gotoScene("Exit");
+      this.quitConfirm.show();
     });
     this.elves = new Elves({
       heads: this.makeGroup("Elf??"),
@@ -139,6 +138,8 @@ export class GameScene extends Scene {
     this.ballMarkers = [this.find("BallMarker0"), this.find("BallMarker1")];
     this.behaviors = new ElfBehaviors(this);
     this.critters = new Critters(this);
+    this.pinSetter = new PinSetter(this);
+    this.quitConfirm = new QuitConfirm(this);
   }
 
   protected start(): void {
@@ -153,43 +154,16 @@ export class GameScene extends Scene {
     this.blinkScoreLights(this.find("LightsOn"));
     this.find("Rake").hide();
     this.find("LeftRake").hide();
+    this.quitConfirm.hide();
     this.idleTaunts = 0;
     this.idleTaunted = [false, false];
     this.tauntedNormal = false;
     this.advance();
-    this.beginFirstBall();
+    this.nextBall();
     this.ballMarkers[0].setCel(0);
     this.ballMarkers[1].setCel(0);
     this.elfMarkers.showRange(0, PIN_COUNT);
     this.elfMarkers.setCelRange(0, PIN_COUNT, 0);
-  }
-
-  private beginFirstBall(): void {
-    if (!this.hintShown) {
-      this.hintShown = true;
-      this.showHintAfter(3750);
-    }
-
-    this.nextBall();
-  }
-
-  private showHintAfter(ms: number): void {
-    const hint = this.find("Hint1a");
-
-    hint.setTimer(0, ms, (sprite) => {
-      sprite.show();
-      this.playSound(sprite, "BepBeep.wav", 4);
-      sprite.setTimer(0, 3500, () => {
-        this.hideHint();
-      });
-    });
-  }
-
-  private hideHint(): void {
-    const hint = this.find("Hint1a");
-
-    hint.hide();
-    hint.clearTimers();
   }
 
   private blinkScoreLights(lights: Sprite): void {
@@ -223,10 +197,8 @@ export class GameScene extends Scene {
       return;
     }
 
-    this.hideHint();
-
     if (event.key === "Escape") {
-      this.stage.gotoScene("Exit");
+      this.quitConfirm.show();
       return;
     }
 
@@ -255,8 +227,6 @@ export class GameScene extends Scene {
   }
 
   private handleThrowInput(_key: string): void {
-    this.hideHint();
-
     if (!this.meterRunning) {
       return;
     }
@@ -265,7 +235,7 @@ export class GameScene extends Scene {
     this.santaThrow();
   }
 
-  private startMeter(): void {
+  startMeter(): void {
     this.startIdleTauntWatch();
     this.markers.setCelAll(0);
     this.meterPosition = 0;
@@ -837,7 +807,7 @@ export class GameScene extends Scene {
     this.critters.deerHeadUp();
     this.santaReaction();
     ball.setTimer(3, 1000, () => {
-      this.rackersPickUp();
+      this.pinSetter.rackersPickUp();
     });
   }
 
@@ -929,7 +899,7 @@ export class GameScene extends Scene {
     text.setText(mark);
   }
 
-  private updatePinMarkers(): void {
+  updatePinMarkers(): void {
     this.ballMarkers[0].show();
     this.ballMarkers[0].setCel(1);
     this.ballMarkers[1].show();
@@ -943,269 +913,11 @@ export class GameScene extends Scene {
     }
   }
 
-  private standingPins(): number[] {
-    const pins: number[] = [];
-
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      if (this.standing[pin]) {
-        pins.push(pin);
-      }
-    }
-
-    return pins;
-  }
-
-  private clearRackerHandlers(): void {
-    for (const racker of this.elves.rackers.sprites) {
-      racker.onMove = null;
-      racker.onOutOfBounds = null;
-    }
-  }
-
-  private rackerDropBounds(racker: Sprite): void {
-    const x = racker.px;
-    const y = racker.py;
-
-    racker.setBounds(makeRect(x - 2, y - 1, x + 2, y + RACKER_DROP));
-  }
-
-  private rackersPickUp(): void {
-    this.clearRackerHandlers();
-
-    const pins = this.standingPins();
-
-    for (const pin of pins) {
-      this.elves.leftRacker(pin).resetToHome();
-
-      const racker = this.elves.racker(pin);
-
-      racker.resetToHome();
-      this.rackerDropBounds(racker);
-      racker.startPhysicsMpx(0, RACKER_SPEED, 30, false, false, 0);
-    }
-
-    const lead = pins[0];
-
-    if (lead === undefined) {
-      this.rackersPickedUp(this.elves.racker(0));
-      return;
-    }
-
-    const leader = this.elves.racker(lead);
-
-    leader.onMove = () => {
-      this.moveLeftRackers(pins, RACKER_LEFT_SPEED);
-    };
-    leader.onOutOfBounds = (sprite) => {
-      this.rackersGrabbed(sprite, pins);
-    };
-    this.playSound(leader, "Rackpins.wav", 14);
-  }
-
-  private moveLeftRackers(pins: number[], dy: number): void {
-    for (const pin of pins) {
-      this.elves.leftRacker(pin).moveByMpx(0, dy);
-    }
-  }
-
-  private rackersGrabbed(leader: Sprite, pins: number[]): void {
-    this.critters.deerHeadDown();
-
-    for (const racker of this.elves.rackers.sprites) {
-      racker.stopPhysics();
-    }
-
-    this.resetStandingElves();
-    leader.setTimer(0, 400, () => {
-      this.liftStandingElves(pins);
-    });
-  }
-
-  private resetStandingElves(): void {
-    for (const pin of this.standingPins()) {
-      this.elves.fullReset(pin);
-      this.elves.setBodyCel(pin, 0);
-      this.elves.setArmsCel(pin, 0);
-      this.elves.resetToHome(pin);
-    }
-  }
-
-  private liftStandingElves(pins: number[]): void {
-    this.clearRackerHandlers();
-
-    pins.forEach((pin, index) => {
-      const racker = this.elves.racker(pin);
-
-      racker.onOutOfBounds = null;
-      racker.startPhysicsMpx(0, -RACKER_SPEED, 30, false, false, 0);
-
-      if (index === 0) {
-        racker.onMove = () => {
-          this.liftStep(pins);
-        };
-        racker.onOutOfBounds = (sprite) => {
-          this.rackersPickedUp(sprite);
-        };
-      }
-
-      this.elves.stopActions(pin);
-      this.elves.clearSway(pin);
-    });
-
-    const leader = this.elves.racker(pins[0]);
-
-    this.playSound(leader, "Rackpins.wav", 14);
-    this.behaviors.randomFlail();
-  }
-
-  private liftStep(pins: number[]): void {
-    for (const pin of pins) {
-      this.elves.leftRacker(pin).moveByMpx(0, -RACKER_LEFT_SPEED);
-      this.elves.body(pin).moveByMpx(0, -RACKER_SPEED);
-      this.elves.leftBody(pin).moveByMpx(0, -RACKER_LEFT_SPEED);
-    }
-  }
-
-  private rackersPickedUp(leader: Sprite): void {
-    for (const racker of this.elves.rackers.sprites) {
-      racker.stopPhysics();
-      racker.clearTimers();
-    }
-
-    this.critters.deerHeadUp();
-    leader.setTimer(3, 100, () => {
-      this.sweepOrContinue();
-    });
-  }
-
-  private sweepOrContinue(): void {
-    const anyFell = this.fellThisBall.some((fell) => fell);
-    const rake = this.find("Rake");
-
-    if (!anyFell) {
-      this.finishBall(rake);
-      return;
-    }
-
-    this.rakeDown(rake);
-  }
-
-  private rakeDown(rake: Sprite): void {
-    rake.resetToHome();
-    rake.show();
-
-    const leftRake = this.find("LeftRake");
-
-    leftRake.resetToHome();
-    leftRake.show();
-
-    for (const sprite of [rake, leftRake]) {
-      const rect = sprite.screenRect();
-
-      sprite.setClipRect(makeRect(rect.l, 0, rect.r, 480));
-    }
-
-    rake.startPhysics(0, 8, 20);
-    rake.setBounds(makeRect(320, rake.homeY - 1, 640, 152));
-    rake.onMove = () => {
-      leftRake.moveTo(leftRake.px, leftRake.py + 2);
-    };
-    rake.onOutOfBounds = (sprite) => {
-      sprite.stopPhysics();
-      sprite.setTimer(0, 300, () => {
-        this.rakeUp(sprite);
-      });
-    };
-  }
-
-  private rakeUp(rake: Sprite): void {
-    rake.stopPhysics();
-    rake.startPhysics(0, -8, 20);
-    rake.setBounds(makeRect(320, rake.homeY - 1, 640, 152));
-    rake.onMove = (sprite) => {
-      this.rakeSweep(sprite);
-    };
-    rake.onOutOfBounds = (sprite) => {
-      sprite.stopPhysics();
-      sprite.hide();
-      sprite.setTimer(0, 100, () => {
-        this.finishBall(sprite);
-      });
-    };
-  }
-
-  private rakeSweep(rake: Sprite): void {
-    const rakeRect = rake.screenRect();
-    const bottom = rakeRect.b;
-
-    if (bottom > 209) {
-      const clip = rake.clip;
-
-      rake.setClipRect(makeRect(clip.l + 4, clip.t, clip.r - 4, clip.b));
-    }
-
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      if (this.fellThisBall[pin]) {
-        this.dragFallenBody(this.elves.body(pin), bottom);
-      }
-    }
-
-    this.sweepLeftRake(bottom);
-  }
-
-  private dragFallenBody(body: Sprite, rakeBottom: number): void {
-    const bodyRect = body.screenRect();
-
-    if (rakeBottom + 10 < bodyRect.b) {
-      body.moveBy(0, rakeBottom + 10 - bodyRect.b);
-    }
-
-    if (rakeBottom >= 211) {
-      return;
-    }
-
-    body.setClipRect(makeRect(0, 0, 640, 194));
-
-    const y = Math.trunc((210 - rakeBottom) / 3) + 194;
-
-    body.moveTo(body.px, y);
-  }
-
-  private sweepLeftRake(rakeBottom: number): void {
-    const leftRake = this.find("LeftRake");
-
-    if (rakeBottom > 209) {
-      const clip = leftRake.clip;
-
-      leftRake.setClipRect(makeRect(clip.l + 1, clip.t, clip.r - 1, clip.b));
-    }
-
-    leftRake.moveTo(leftRake.px, leftRake.py - 2);
-
-    const leftBottom = leftRake.screenRect().b;
-
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      if (!this.fellThisBall[pin]) {
-        continue;
-      }
-
-      const body = this.elves.leftBody(pin);
-      const bodyBottom = body.screenRect().b;
-
-      if (leftBottom + 2 < bodyBottom) {
-        body.moveBy(0, leftBottom + 2 - bodyBottom);
-      }
-
-      if (leftBottom < 225) {
-        body.hide();
-      }
-    }
-  }
-
-  private finishBall(sprite: Sprite): void {
+  finishBall(sprite: Sprite): void {
     const gameOver = isGameOver(this.frames, this.frame);
 
     if (gameOver) {
+      recordBestScore(session.finalScore);
       this.playSound(sprite, "gameovr.wav", 58);
       sprite.setTimer(3, 3000, () => {
         this.stage.gotoScene("Exit");
@@ -1268,162 +980,8 @@ export class GameScene extends Scene {
     }
 
     this.elves.racker(0).setTimer(0, 300, () => {
-      this.rackersSetElves();
+      this.pinSetter.rackersSetElves();
     });
     this.santaWalkIn();
-  }
-
-  private rackersSetElves(): void {
-    this.clearRackerHandlers();
-
-    const pins = this.standingPins();
-
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      this.prepareRackerDescent(pin);
-    }
-
-    for (const pin of pins) {
-      const racker = this.elves.racker(pin);
-
-      this.rackerDropBounds(racker);
-      racker.startPhysicsMpx(0, RACKER_SPEED, 30, false, false, 0);
-    }
-
-    this.showRackedElves();
-    this.behaviors.randomFlail();
-
-    const lead = pins[0];
-
-    if (lead === undefined) {
-      return;
-    }
-
-    const leader = this.elves.racker(lead);
-
-    leader.onMove = () => {
-      this.lowerStep(pins);
-    };
-    leader.onOutOfBounds = (sprite) => {
-      this.elvesSet(sprite);
-    };
-    this.playSound(leader, "Rackpins2.wav", 34);
-  }
-
-  private prepareRackerDescent(pin: number): void {
-    this.elves.stopPhysics(pin);
-
-    for (const part of this.elves.parts(pin)) {
-      part.clearTimers();
-    }
-
-    this.elves.stopRacker(pin);
-    this.elves.setRackerCel(pin, 0);
-
-    const body = this.elves.body(pin);
-
-    body.moveTo(body.homeX, body.homeY - RACKER_DROP);
-
-    const leftBody = this.elves.leftBody(pin);
-
-    leftBody.moveTo(leftBody.homeX, leftBody.homeY - LEFT_RACKER_DROP);
-    this.elves.leftRacker(pin).resetToHome();
-    this.elves.racker(pin).resetToHome();
-  }
-
-  private showRackedElves(): void {
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      if (this.standing[pin]) {
-        this.elves.showAll(pin);
-        continue;
-      }
-
-      this.elves.hideAll(pin);
-    }
-  }
-
-  private lowerStep(pins: number[]): void {
-    for (const pin of pins) {
-      this.elves.body(pin).moveByMpx(0, RACKER_SPEED);
-      this.elves.leftBody(pin).moveByMpx(0, RACKER_LEFT_SPEED);
-      this.elves.leftRacker(pin).moveByMpx(0, RACKER_LEFT_SPEED);
-    }
-  }
-
-  private elvesSet(leader: Sprite): void {
-    for (const racker of this.elves.rackers.sprites) {
-      racker.stopPhysics();
-    }
-
-    this.updatePinMarkers();
-    leader.setTimer(0, 450, () => {
-      this.resetStandingElves();
-      leader.setTimer(0, 400, () => {
-        this.rackersRelease(leader);
-      });
-    });
-  }
-
-  private rackersRelease(sprite: Sprite): void {
-    this.clearRackerHandlers();
-
-    const pins = this.standingPins();
-    const risers: number[] = [];
-    for (const pin of pins) {
-      const handled = this.behaviors.releaseSpecial(pin, sprite);
-
-      if (!handled) {
-        risers.push(pin);
-      }
-    }
-
-    const playSound = risers.length === pins.length;
-
-    risers.forEach((pin, index) => {
-      const racker = this.elves.racker(pin);
-
-      racker.onOutOfBounds = null;
-      racker.startPhysicsMpx(0, -RACKER_SPEED, 30, false, false, 0);
-
-      if (index !== 0) {
-        return;
-      }
-
-      racker.onMove = () => {
-        this.raiseLeftRackers();
-      };
-      racker.onOutOfBounds = (leader) => {
-        this.rackersGone(leader);
-      };
-    });
-
-    if (risers.length === 0) {
-      this.rackersGone(sprite);
-      return;
-    }
-
-    if (playSound) {
-      this.playSound(sprite, "Rackpins.wav", 14);
-    }
-  }
-
-  private raiseLeftRackers(): void {
-    for (let pin = 0; pin < PIN_COUNT; pin++) {
-      const keepsHead = this.ball === 0 && this.behaviors.behaviorOf(pin) === Behavior.BouncingHead;
-
-      if (!keepsHead) {
-        this.elves.leftRacker(pin).moveByMpx(0, -RACKER_LEFT_SPEED);
-      }
-    }
-  }
-
-  private rackersGone(leader: Sprite): void {
-    for (const racker of this.elves.rackers.sprites) {
-      racker.stopPhysics();
-      racker.clearTimers();
-    }
-
-    leader.onMove = null;
-    this.behaviors.startFrameBehaviors();
-    this.startMeter();
   }
 }
