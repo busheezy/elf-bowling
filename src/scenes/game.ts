@@ -144,8 +144,6 @@ export class GameScene extends Scene {
   protected start(): void {
     this.cheat = "none";
     session.finalScore = 0;
-    session.cheated = false;
-    session.key1 = (this.random() % 999999) + 1;
     this.frame = -1;
     this.ball = 1;
     this.behaviors.shuffleFrameOrder();
@@ -254,10 +252,6 @@ export class GameScene extends Scene {
     }
 
     this.cheat = selected;
-
-    if (selected !== "none") {
-      session.cheated = true;
-    }
   }
 
   private handleThrowInput(_key: string): void {

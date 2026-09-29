@@ -27,12 +27,10 @@ export class Stage {
   private pending: Scene | null = null;
   private pendingReturn: Scene | null = null;
   private returnScenes = new Map<Scene, Scene | null>();
-  private readonly onQuit: () => void;
 
-  constructor(canvas: HTMLCanvasElement, assets: Assets, audio: AudioContext, onQuit: () => void) {
+  constructor(canvas: HTMLCanvasElement, assets: Assets, audio: AudioContext) {
     this.canvas = canvas;
     this.assets = assets;
-    this.onQuit = onQuit;
     this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.sound = new SoundManager(audio, assets, () => this.now);
 
@@ -103,13 +101,6 @@ export class Stage {
 
     this.pending = target;
     this.pendingReturn = null;
-  }
-
-  quit(): void {
-    this.sound.stopAll();
-    this.pending = null;
-    this.current = null;
-    this.onQuit();
   }
 
   applyLayout(scene: Scene): void {

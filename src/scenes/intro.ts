@@ -117,12 +117,6 @@ export class IntroScene extends Scene {
   }
 
   private createButtons(): void {
-    const quit = this.addButton("IntroQuit", "IntroQuitOff.bmp", "IntroQuitOn.bmp");
-
-    quit.onClick = () => {
-      this.stage.quit();
-    };
-
     const rules = this.addButton("IntroRules", "RulesOn.bmp", "RulesOff.bmp");
 
     rules.onClick = () => {
@@ -308,11 +302,6 @@ export class IntroScene extends Scene {
   }
 
   private handleKey(event: KeyboardEvent): void {
-    if (event.key === "Escape") {
-      this.stage.quit();
-      return;
-    }
-
     if (event.key === "Enter") {
       this.enterPlay();
     }

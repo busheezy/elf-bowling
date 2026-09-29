@@ -174,10 +174,6 @@ export abstract class Scene {
     return sprite;
   }
 
-  findButton(name: string): Button {
-    return this.find(name) as Button;
-  }
-
   addSprite(name: string, bitmap: string): Sprite {
     const cast = this.stage.assets.cast(bitmap);
     const sprite = new Sprite(this, name, cast);

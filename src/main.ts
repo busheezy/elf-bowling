@@ -15,13 +15,6 @@ function showMessage(text: string): void {
   overlay.hidden = false;
 }
 
-function onQuit(): void {
-  showMessage("Thanks for playing. Click to start again.");
-  overlay.onclick = () => {
-    window.location.reload();
-  };
-}
-
 async function boot(): Promise<void> {
   const audio = new AudioContext();
 
@@ -40,7 +33,7 @@ async function boot(): Promise<void> {
     overlay.onclick = null;
     await audio.resume();
 
-    const stage = new Stage(canvas, assets, audio, onQuit);
+    const stage = new Stage(canvas, assets, audio);
     const scenes = [
       new PreIntroScene(stage, "PreIntro", 100),
       new IntroScene(stage, "Intro", 100),

@@ -10,7 +10,6 @@ const CREDIT_PAGE_MS = 9000;
 const CREDITS_SCROLL_MS = 80;
 const HEAD_HALF_WIDTH = 16;
 const HEAD_HALF_HEIGHT = 21;
-const SCORE_URL = "http://www.nstorm.com/scores/setscore.cfm";
 const DANCERS = ["Elfx01", "Elfx00", "Elfx02"];
 const MOUSE_ELF_TARGETS: [string, string][] = [
   ["MouseElf1", "Elfx02"],
@@ -21,7 +20,6 @@ const NORMAL_SPRITES = [
   "BLogo2",
   "ExitPlay",
   "ExitRules",
-  "ExitQuit",
   "xMas",
   "MouseElf1",
   "MouseElf2",
@@ -38,7 +36,6 @@ const NORMAL_SPRITES = [
   "DaScore",
   "ScorePadTextr2",
 ];
-const BLINKING_BUTTONS = ["BigRedButton", "NStormCom", "Planet"];
 
 function formatCreditLine(line: string): { text: string; bold: boolean } {
   const bold = line.startsWith("#");
@@ -126,25 +123,7 @@ export class ExitScene extends Scene {
       this.stage.pushScene("About");
     });
 
-    const quit = this.addButton("ExitQuit", "IntroQuitOff.bmp", "IntroQuitOn.bmp");
-
-    quit.onClick = this.guarded(() => {
-      this.stage.quit();
-    });
-
     this.addSprite("xMas", "MerryChristmas.bmp");
-
-    const nstorm = this.addButton("nstormcom", "nstormOff.bmp", "nstormOn.bmp");
-
-    nstorm.onClick = this.guarded(() => {
-      window.open("http://www.nstorm.com", "_blank");
-    });
-
-    const planet = this.addButton("planet", "ThePlanetOff.bmp", "ThePlanetOn.bmp");
-
-    planet.onClick = this.guarded(() => {
-      window.open("http://www.theplanet.com", "_blank");
-    });
   }
 
   private createDancers(): void {
@@ -166,12 +145,6 @@ export class ExitScene extends Scene {
   }
 
   private createScore(): void {
-    const submit = this.addButton("BigRedButton", "ClickHere1.bmp", "ClickHere2.bmp");
-
-    submit.onClick = this.guarded(() => {
-      this.submitScore();
-    });
-
     const scoreLabel = this.addSprite("DaScore", "Score.bmp");
     const pad = this.addTextSprite("ScorePadTextr2", scoreLabel, 2, 3, 3, 20, -175);
 
@@ -227,7 +200,6 @@ export class ExitScene extends Scene {
     }
 
     this.startDancing();
-    this.startBlinking();
     this.startLights();
     this.normalStartTime = this.now;
   }
@@ -240,16 +212,6 @@ export class ExitScene extends Scene {
     for (const name of DANCERS) {
       this.find(`${name} Body`).startCelCycle(300, 0, 4);
       this.find(`${name} Arms`).startCelCycle(300, 0, 2);
-    }
-  }
-
-  private startBlinking(): void {
-    for (const name of BLINKING_BUTTONS) {
-      const button = this.findButton(name);
-
-      button.show();
-      button.startBlink(3, 1500, 300, 2500);
-      button.setBlinkSound("light.wav", 1);
     }
   }
 
@@ -275,9 +237,7 @@ export class ExitScene extends Scene {
     this.eggMode = true;
     this.resetAllSprites();
 
-    const hidden = [...NORMAL_SPRITES, ...BLINKING_BUTTONS];
-
-    for (const name of hidden) {
+    for (const name of NORMAL_SPRITES) {
       this.find(name).hide();
     }
 
@@ -441,33 +401,11 @@ export class ExitScene extends Scene {
     });
   }
 
-  private submitScore(): void {
-    const score = session.finalScore;
-    const key1 = session.key1;
-    const key2 = (score * score * 3 + score * 17 + key1 * 73) % 1000000;
-    const key2Text = session.cheated ? "-1" : String(key2);
-    const url = `${SCORE_URL}?game=elfbowl&score=${score}&key1=${key1}&key2=${key2Text}`;
-
-    window.open(url, "_blank");
-  }
-
   private handleKey(event: KeyboardEvent): void {
-    if (event.key === "Escape") {
-      this.escape();
-      return;
-    }
+    const isEscape = event.key === "Escape";
 
-    if (event.key === "Enter") {
-      this.stage.quit();
-    }
-  }
-
-  private escape(): void {
-    if (this.eggMode) {
+    if (isEscape && this.eggMode) {
       this.normalMode();
-      return;
     }
-
-    this.stage.quit();
   }
 }

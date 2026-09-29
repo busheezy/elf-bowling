@@ -13,15 +13,6 @@ export class Button extends Sprite {
   hoverPriority = DEFAULT_HOVER_PRIORITY;
   silent = false;
   private hover = false;
-  private blinking = false;
-  private blinkPhase = 0;
-  private blinkCounter = 0;
-  private blinksPerBurst = 0;
-  private blinkPeriod = 0;
-  private blinkPause = 0;
-  private blinkNext = 0;
-  private blinkSound: string | null = null;
-  private blinkPriority = 0;
 
   constructor(scene: Scene, name: string, idle: Drawable, active: Drawable) {
     super(scene, name, idle);
@@ -34,26 +25,9 @@ export class Button extends Sprite {
     this.silent = name === null;
   }
 
-  startBlink(blinksPerBurst: number, firstDelay: number, period: number, pause: number): void {
-    this.blinking = true;
-    this.blinksPerBurst = blinksPerBurst;
-    this.blinkPeriod = period;
-    this.blinkPause = pause;
-    this.blinkCounter = 0;
-    this.blinkPhase = 0;
-    this.blinkNext = this.now + firstDelay;
-  }
-
-  setBlinkSound(name: string | null, priority: number): void {
-    this.blinkSound = name;
-    this.blinkPriority = priority;
-  }
-
   override reset(): void {
     super.reset();
     this.hover = false;
-    this.blinking = false;
-    this.blinkPhase = 0;
   }
 
   override handleInput(): void {
@@ -70,7 +44,6 @@ export class Button extends Sprite {
       this.handleClick();
     }
 
-    this.updateBlink();
     this.updateHover(rect);
   }
 
@@ -86,45 +59,6 @@ export class Button extends Sprite {
     this.onClick(this);
   }
 
-  private updateBlink(): void {
-    if (!this.blinking || this.blinkNext >= this.now) {
-      return;
-    }
-
-    this.blinkPhase ^= 1;
-
-    const delay = this.nextBlinkDelay();
-
-    this.blinkNext += delay;
-    this.setCel(this.blinkPhase | (this.hover ? 1 : 0));
-  }
-
-  private nextBlinkDelay(): number {
-    if (this.blinkPhase === 1) {
-      this.playBlinkSound();
-
-      return this.blinkPeriod;
-    }
-
-    this.blinkCounter++;
-
-    if (this.blinkCounter < this.blinksPerBurst) {
-      return this.blinkPeriod;
-    }
-
-    this.blinkCounter = 0;
-
-    return this.blinkPause;
-  }
-
-  private playBlinkSound(): void {
-    if (!this.blinkSound) {
-      return;
-    }
-
-    this.scene.stage.sound.play(null, this, this.blinkSound, this.blinkPriority);
-  }
-
   private updateHover(rect: ReturnType<Sprite["drawRect"]>): void {
     const stage = this.scene.stage;
     const inside = rectContains(rect, stage.mouseX, stage.mouseY);
@@ -136,7 +70,7 @@ export class Button extends Sprite {
 
     if (this.hover && !inside) {
       this.hover = false;
-      this.setCel(this.blinkPhase);
+      this.setCel(0);
     }
   }
 
@@ -146,7 +80,7 @@ export class Button extends Sprite {
     }
 
     this.hover = true;
-    this.setCel(this.blinkPhase | 1);
+    this.setCel(1);
 
     if (this.onHoverEnter) {
       this.onHoverEnter(this);

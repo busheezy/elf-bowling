@@ -88,10 +88,6 @@ export class SoundManager {
     this.background = null;
   }
 
-  stopAll(): void {
-    this.stopCurrent();
-  }
-
   endScene(scene: Scene): void {
     this.background = null;
 

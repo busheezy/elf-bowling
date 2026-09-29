@@ -45,11 +45,6 @@ export class PreIntroScene extends Scene {
   }
 
   private handleKey(event: KeyboardEvent): void {
-    if (event.key === "Escape") {
-      this.stage.quit();
-      return;
-    }
-
     if (event.key === "Enter") {
       const logo = this.find("xNVDLogo");
 
