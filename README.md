@@ -29,7 +29,7 @@ The first commit is a direct port of the original game. Everything since then:
 **Removed web integrations**
 
 - Removed the online high score submission ("click here" button) that posted to `nstorm.com`.
-- Removed the NStorm and The Planet link buttons, and the blinking-button logic they used.
+- Removed the "Hosting and bandwidth provided by The Planet" button, and the links from the blinking nstorm.com button.
 - Removed the Quit button and the "Thanks for playing" screen, since a browser tab doesn't need them.
 
 **Gameplay and UX**

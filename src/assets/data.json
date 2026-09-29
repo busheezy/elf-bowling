@@ -242,13 +242,13 @@
     },
     {
       "name": "IntroRules",
-      "x": 320,
+      "x": 365,
       "y": 429,
       "flags": 1
     },
     {
       "name": "IntroPlay",
-      "x": 240,
+      "x": 285,
       "y": 429,
       "flags": 1
     },
@@ -782,7 +782,7 @@
     },
     {
       "name": "NStorm",
-      "x": 210,
+      "x": 320,
       "y": 32,
       "flags": 1
     },
@@ -800,14 +800,20 @@
     },
     {
       "name": "ExitRules",
-      "x": 120,
-      "y": 230,
+      "x": 161,
+      "y": 260,
       "flags": 1
     },
     {
       "name": "xMas",
       "x": 320,
       "y": 380,
+      "flags": 1
+    },
+    {
+      "name": "nstormcom",
+      "x": 120,
+      "y": 292,
       "flags": 1
     },
     {

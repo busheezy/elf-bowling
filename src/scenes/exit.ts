@@ -38,6 +38,7 @@ const NORMAL_SPRITES = [
   "DaScore",
   "ScorePadTextr2",
 ];
+const BLINKING_BUTTONS = ["NStormCom"];
 
 function formatCreditLine(line: string): { text: string; bold: boolean } {
   const bold = line.startsWith("#");
@@ -126,6 +127,8 @@ export class ExitScene extends Scene {
     });
 
     this.addSprite("xMas", "MerryChristmas.bmp");
+
+    this.addButton("nstormcom", "nstormOff.bmp", "nstormOn.bmp");
   }
 
   private createDancers(): void {
@@ -206,6 +209,7 @@ export class ExitScene extends Scene {
     }
 
     this.startDancing();
+    this.startBlinking();
     this.startLights();
     this.normalStartTime = this.now;
   }
@@ -218,6 +222,16 @@ export class ExitScene extends Scene {
     for (const name of DANCERS) {
       this.find(`${name} Body`).startCelCycle(300, 0, 4);
       this.find(`${name} Arms`).startCelCycle(300, 0, 2);
+    }
+  }
+
+  private startBlinking(): void {
+    for (const name of BLINKING_BUTTONS) {
+      const button = this.findButton(name);
+
+      button.show();
+      button.startBlink(3, 1500, 300, 2500);
+      button.setBlinkSound("light.wav", 1);
     }
   }
 
@@ -243,7 +257,9 @@ export class ExitScene extends Scene {
     this.eggMode = true;
     this.resetAllSprites();
 
-    for (const name of NORMAL_SPRITES) {
+    const hidden = [...NORMAL_SPRITES, ...BLINKING_BUTTONS];
+
+    for (const name of hidden) {
       this.find(name).hide();
     }
 
