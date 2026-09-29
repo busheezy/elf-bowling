@@ -44,7 +44,7 @@ function addCels(scene: Scene, sprite: Sprite, bitmaps: string[]): void {
 }
 
 function addFlySequence(body: Sprite, flyCel: number, landCel: number): void {
-  body.newSequence(1);
+  body.newSequence(1, true);
 
   for (const dy of FLY_DY) {
     body.addSteps(flyCel, 1, 1, 0, dy, 30);
@@ -58,11 +58,11 @@ function buildRacker(scene: Scene, racker: Sprite, x: number, y: number): void {
   racker.noParm = true;
   racker.setAllCelsMode(2);
   racker.setHome(x - 2, y - 454);
-  racker.newSequence(1);
+  racker.newSequence(1, true);
   racker.addSteps(1, 2, 1, 0, -4, 50);
   racker.addSteps(1, 2, 1, 0, 4, 50);
   racker.addSteps(1, 1, 1, 0, 0, 200);
-  racker.newSequence(1);
+  racker.newSequence(1, true);
   racker.addSteps(1, 2, 1, 0, -4, 50);
   racker.addSteps(1, 1, 1, 0, 0, 200);
   racker.addSteps(1, 24, 1, 0, -12, 30);
@@ -168,7 +168,7 @@ function buildBody(scene: Scene, body: Sprite, x: number, y: number): void {
     body.addSteps(0, 1, 1, 0, 0, 250);
   }
 
-  body.newSequence(1);
+  body.newSequence(1, true);
 
   HOP_DY.forEach((dy, index) => {
     const cel = index % 2 === 0 ? 4 : 5;
@@ -340,7 +340,7 @@ function createDeer(scene: Scene): void {
   const deerBall = scene.addSprite("DeerBall", "Ball50.bmp");
 
   addCels(scene, deerBall, ["Ball40.bmp", "Ball30.bmp", "Ball30Snow.bmp"]);
-  deerBall.newSequence(1);
+  deerBall.newSequence(1, true);
 
   const toDeer: [number, number][] = [
     [0, -30],
@@ -357,7 +357,7 @@ function createDeer(scene: Scene): void {
     deerBall.addSteps(cel, 1, 1, -2, dy, 40);
   }
 
-  deerBall.newSequence(1);
+  deerBall.newSequence(1, true);
 
   const bounceAway: [number, number][] = [
     [2, -16],
@@ -541,13 +541,12 @@ function createSanta(scene: Scene): void {
   const santa = scene.addSprite("Santa", "Santa1.bmp");
 
   addCels(scene, santa, ["Santa2.bmp", "SantaJoy.bmp", "SantaWalkBack.bmp"]);
-  santa.newSequence(4);
+  santa.newSequence(4, true);
   santa.addSteps(2, 4, 1, 0, -5, 30);
   santa.addSteps(2, 4, 1, 0, 5, 30);
   santa.addSteps(2, 1, 1, 0, 0, 30);
-  santa.newSequence(6);
-  santa.addSteps(3, 4, 1, 0, 8, 30);
-  santa.addSteps(3, 1, 1, 0, 0, 140);
+  santa.newSequence(6, true);
+  santa.addSteps(3, 4, 1, 0, 8, 65);
 }
 
 export function buildGameScene(scene: Scene, onQuit: () => void): number[] {

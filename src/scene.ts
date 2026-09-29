@@ -1,6 +1,6 @@
 import { Button } from "./button";
 import { TextCast, type Drawable, type Rect } from "./cast";
-import { Sprite, UNSET, type SpriteCallback } from "./sprite";
+import { Sprite, UNSET, type Motion, type SpriteCallback } from "./sprite";
 import type { Stage } from "./stage";
 
 export type KeyHandler = (key: KeyboardEvent) => void;
@@ -79,6 +79,7 @@ export abstract class Scene {
   onKeyDown: KeyHandler | null = null;
   onMouseDown: (() => void) | null = null;
   onMouseUp: (() => void) | null = null;
+  motion: Motion | null = null;
   private initialized = false;
   private startTime = 0;
   private ticksDone = 0;

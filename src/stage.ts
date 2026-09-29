@@ -54,6 +54,8 @@ export class Stage {
   private modal: Modal | null = null;
   private readonly audio: AudioContext;
   private readonly context: CanvasRenderingContext2D;
+  private readonly frame: HTMLCanvasElement;
+  private readonly frameContext: CanvasRenderingContext2D;
   private readonly scenes = new Map<string, Scene>();
   private readonly layoutByName = new Map<string, LayoutRecord>();
   private current: Scene | null = null;
@@ -66,6 +68,8 @@ export class Stage {
     this.assets = assets;
     this.audio = audio;
     this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.frame = document.createElement("canvas");
+    this.frameContext = this.frame.getContext("2d") as CanvasRenderingContext2D;
     this.sound = new SoundManager(audio, assets, () => this.now);
 
     for (const record of assets.layout) {
@@ -255,16 +259,28 @@ export class Stage {
     const scene = this.current;
 
     this.syncResolution();
-    this.context.fillStyle = "#000";
-    this.context.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+    this.frameContext.fillStyle = "#000";
+    this.frameContext.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
 
     if (!scene) {
+      this.presentFrame();
       return;
     }
 
     scene.logic();
     this.updateModal();
-    scene.draw(this.context);
+    scene.draw(this.frameContext);
+    this.presentFrame();
+  }
+
+  private presentFrame(): void {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    this.context.setTransform(1, 0, 0, 1, 0, 0);
+    this.context.imageSmoothingEnabled = true;
+    this.context.imageSmoothingQuality = "high";
+    this.context.drawImage(this.frame, 0, 0, width, height);
   }
 
   private syncResolution(): void {
@@ -281,9 +297,18 @@ export class Stage {
 
     const scaleX = width / STAGE_WIDTH;
     const scaleY = height / STAGE_HEIGHT;
+    const frameScale = Math.ceil(Math.max(scaleX, scaleY));
+    const frameWidth = STAGE_WIDTH * frameScale;
+    const frameHeight = STAGE_HEIGHT * frameScale;
+    const isFrameResized = this.frame.width !== frameWidth || this.frame.height !== frameHeight;
 
-    this.context.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-    this.context.imageSmoothingEnabled = false;
+    if (isFrameResized) {
+      this.frame.width = frameWidth;
+      this.frame.height = frameHeight;
+    }
+
+    this.frameContext.setTransform(frameScale, 0, 0, frameScale, 0, 0);
+    this.frameContext.imageSmoothingEnabled = false;
   }
 
   private toStage(event: PointerEvent): [number, number] {

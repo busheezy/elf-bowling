@@ -17,8 +17,14 @@ interface SequenceStep {
 
 interface Sequence {
   loops: number;
+  smooth: boolean;
   steps: SequenceStep[];
   onDone: SpriteCallback | null;
+}
+
+export interface Motion {
+  at: number;
+  duration: number;
 }
 
 interface Timer {
@@ -49,6 +55,18 @@ export function rectContains(rect: Rect, x: number, y: number): boolean {
 
 function copyRect(rect: Rect): Rect {
   return { l: rect.l, t: rect.t, r: rect.r, b: rect.b };
+}
+
+function snapToDevicePixels(context: CanvasRenderingContext2D, rect: Rect): Rect {
+  const transform = context.getTransform();
+  const scaleX = transform.a;
+  const scaleY = transform.d;
+  const l = Math.round(rect.l * scaleX) / scaleX;
+  const t = Math.round(rect.t * scaleY) / scaleY;
+  const r = Math.round(rect.r * scaleX) / scaleX;
+  const b = Math.round(rect.b * scaleY) / scaleY;
+
+  return { l, t, r, b };
 }
 
 function advanceTime(current: number, now: number, ms: number): number {
@@ -127,6 +145,11 @@ export class Sprite {
   private talkNext = 0;
   private talkInterval = 0;
 
+  private tweenX = 0;
+  private tweenY = 0;
+  private tweenStart = 0;
+  private tweenDuration = 0;
+
   constructor(scene: Scene, name: string, cast: Drawable | null) {
     this.scene = scene;
     this.name = name;
@@ -202,11 +225,16 @@ export class Sprite {
     this.homeY = y;
     this.x = x * 1000;
     this.y = y * 1000;
+    this.clearTween();
   }
 
   moveByMpx(dx: number, dy: number): void {
+    const startPx = this.px;
+    const startPy = this.py;
+
     this.x += dx;
     this.y += dy;
+    this.trackMove(this.px - startPx, this.py - startPy);
 
     if (this.attached) {
       this.attached.moveByMpx(dx, dy);
@@ -218,10 +246,70 @@ export class Sprite {
   }
 
   moveTo(x: number, y: number): void {
+    this.withMotion(null, () => {
+      this.shiftTo(x, y);
+    });
+  }
+
+  private shiftTo(x: number, y: number): void {
     const dx = x * 1000 - this.x;
     const dy = y * 1000 - this.y;
 
     this.moveByMpx(dx, dy);
+  }
+
+  private withMotion(motion: Motion | null, action: () => void): void {
+    const scene = this.scene;
+    const previous = scene.motion;
+
+    scene.motion = motion;
+    action();
+    scene.motion = previous;
+  }
+
+  private tweenRemaining(time: number): number {
+    if (this.tweenDuration <= 0) {
+      return 0;
+    }
+
+    const elapsed = time - this.tweenStart;
+    const progress = Math.min(Math.max(elapsed / this.tweenDuration, 0), 1);
+
+    return 1 - progress;
+  }
+
+  private trackMove(dx: number, dy: number): void {
+    const motion = this.scene.motion;
+    const isStill = dx === 0 && dy === 0;
+
+    if (isStill) {
+      return;
+    }
+
+    if (!motion) {
+      this.clearTween();
+      return;
+    }
+
+    const remaining = this.tweenRemaining(motion.at);
+
+    this.tweenX = this.tweenX * remaining - dx;
+    this.tweenY = this.tweenY * remaining - dy;
+    this.tweenStart = motion.at;
+    this.tweenDuration = motion.duration;
+  }
+
+  private clearTween(): void {
+    this.tweenX = 0;
+    this.tweenY = 0;
+    this.tweenDuration = 0;
+  }
+
+  inheritTween(source: Sprite): void {
+    this.tweenX = source.tweenX;
+    this.tweenY = source.tweenY;
+    this.tweenStart = source.tweenStart;
+    this.tweenDuration = source.tweenDuration;
   }
 
   resetToHome(): void {
@@ -300,8 +388,8 @@ export class Sprite {
     }
   }
 
-  newSequence(loops: number): number {
-    this.sequences.push({ loops, steps: [], onDone: null });
+  newSequence(loops: number, smooth = false): number {
+    this.sequences.push({ loops, smooth, steps: [], onDone: null });
 
     return this.sequences.length - 1;
   }
@@ -347,7 +435,7 @@ export class Sprite {
     this.sequences = source.sequences.map((sequence) => {
       const steps = sequence.steps.map(copyStep);
 
-      return { loops: sequence.loops, steps, onDone: null };
+      return { loops: sequence.loops, smooth: sequence.smooth, steps, onDone: null };
     });
   }
 
@@ -400,9 +488,22 @@ export class Sprite {
       return;
     }
 
-    this.stepEnd += step.duration;
+    const at = this.stepEnd;
+    const duration = step.duration;
+
+    this.stepEnd += duration;
     this.setCel(step.cel);
-    this.moveByMpx(step.dx, step.dy);
+
+    if (!sequence.smooth) {
+      this.moveByMpx(step.dx, step.dy);
+      return;
+    }
+
+    const motion = { at, duration };
+
+    this.withMotion(motion, () => {
+      this.moveByMpx(step.dx, step.dy);
+    });
   }
 
   private stepSequence(): void {
@@ -541,7 +642,23 @@ export class Sprite {
     this.y = Math.min(Math.max(this.y, minY), maxY);
   }
 
-  private physicsStep(): void {
+  private physicsStep(at: number): void {
+    const duration = this.stepInterval;
+    const motion = { at, duration };
+
+    this.withMotion(motion, () => {
+      this.physicsMove();
+    });
+
+    if (!this.physics) {
+      return;
+    }
+
+    this.applyBounce();
+    this.checkOutOfBounds();
+  }
+
+  private physicsMove(): void {
     const startX = this.x;
     const startY = this.y;
     const startPx = this.px;
@@ -557,6 +674,8 @@ export class Sprite {
     const movedY = this.y - startY;
     const pixelChanged = this.px !== startPx || this.py !== startPy;
 
+    this.trackMove(this.px - startPx, this.py - startPy);
+
     if (this.attached) {
       this.attached.moveByMpx(movedX, movedY);
     }
@@ -564,13 +683,6 @@ export class Sprite {
     if (pixelChanged && this.onMove) {
       this.onMove(this);
     }
-
-    if (!this.physics) {
-      return;
-    }
-
-    this.applyBounce();
-    this.checkOutOfBounds();
   }
 
   private applyBounce(): void {
@@ -648,7 +760,7 @@ export class Sprite {
     this.moveTo(fromX, fromY);
   }
 
-  private glideStep(): void {
+  private glideStep(at: number): void {
     this.glideProgress = Math.min(this.glideProgress + this.glideIncrement, 10000);
 
     if (this.glideProgress >= this.glideSlowAt) {
@@ -659,7 +771,12 @@ export class Sprite {
     const x = this.glideFromX - Math.trunc(((this.glideFromX - this.glideToX) * progress) / 10000);
     const y = this.glideFromY - Math.trunc(((this.glideFromY - this.glideToY) * progress) / 10000);
 
-    this.moveTo(x, y);
+    const duration = this.stepInterval;
+    const motion = { at, duration };
+
+    this.withMotion(motion, () => {
+      this.shiftTo(x, y);
+    });
 
     if (progress >= 10000) {
       this.gliding = false;
@@ -705,13 +822,17 @@ export class Sprite {
     }
 
     if (this.physics && this.nextStep < now) {
+      const at = this.nextStep;
+
       this.nextStep = advanceTime(this.nextStep, now, this.stepInterval);
-      this.physicsStep();
+      this.physicsStep(at);
     }
 
     if (this.gliding && this.nextStep < now) {
+      const at = this.nextStep;
+
       this.nextStep = advanceTime(this.nextStep, now, this.stepInterval);
-      this.glideStep();
+      this.glideStep(at);
     }
 
     this.animateTalking();
@@ -738,6 +859,7 @@ export class Sprite {
     this.maxFall = UNSET;
     this.x = this.homeX * 1000;
     this.y = this.homeY * 1000;
+    this.clearTween();
     this.enabled = true;
     this.onMove = null;
     this.onOutOfBounds = null;
@@ -773,20 +895,29 @@ export class Sprite {
       return;
     }
 
-    this.drawCast(context, this.currentCast);
+    const remaining = this.tweenRemaining(this.now);
+    const drawX = this.px + this.tweenX * remaining;
+    const drawY = this.py + this.tweenY * remaining;
+
+    this.drawCast(context, this.currentCast, drawX, drawY);
 
     const overlay = this.talkOverlays[this.cel];
     const showOverlay = this.talking && this.talkPhase === 1 && overlay;
 
     if (showOverlay) {
-      this.drawCast(context, overlay);
+      this.drawCast(context, overlay, drawX, drawY);
     }
   }
 
-  private drawCast(context: CanvasRenderingContext2D, cast: Drawable): void {
+  private drawCast(
+    context: CanvasRenderingContext2D,
+    cast: Drawable,
+    drawX: number,
+    drawY: number,
+  ): void {
     const surface = cast.surface();
-    const offsetX = this.px - cast.hotspotX;
-    const offsetY = this.py - cast.hotspotY;
+    const offsetX = drawX - cast.hotspotX;
+    const offsetY = drawY - cast.hotspotY;
     const screen = {
       l: surface.bbox.l + offsetX,
       t: surface.bbox.t + offsetY,
@@ -808,6 +939,9 @@ export class Sprite {
     const sourceWidth = width * scaleX;
     const sourceHeight = height * scaleY;
     const isScaled = scaleX !== 1 || scaleY !== 1;
+    const target = snapToDevicePixels(context, visibleArea);
+    const targetWidth = target.r - target.l;
+    const targetHeight = target.b - target.t;
 
     context.imageSmoothingEnabled = isScaled;
     context.imageSmoothingQuality = "high";
@@ -817,10 +951,10 @@ export class Sprite {
       sourceY,
       sourceWidth,
       sourceHeight,
-      visibleArea.l,
-      visibleArea.t,
-      width,
-      height,
+      target.l,
+      target.t,
+      targetWidth,
+      targetHeight,
     );
   }
 

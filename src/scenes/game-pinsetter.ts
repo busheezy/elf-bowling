@@ -184,7 +184,7 @@ export class PinSetter {
     rake.startPhysics(0, 8, 20);
     rake.setBounds(makeRect(320, rake.homeY - 1, 640, 152));
     rake.onMove = () => {
-      leftRake.moveTo(leftRake.px, leftRake.py + 2);
+      leftRake.moveBy(0, 2);
     };
     rake.onOutOfBounds = (sprite) => {
       sprite.stopPhysics();
@@ -244,7 +244,7 @@ export class PinSetter {
 
     const y = Math.trunc((210 - rakeBottom) / 3) + 194;
 
-    body.moveTo(body.px, y);
+    body.moveBy(0, y - body.py);
   }
 
   private sweepLeftRake(rakeBottom: number): void {
@@ -256,7 +256,7 @@ export class PinSetter {
       leftRake.setClipRect(makeRect(clip.l + 1, clip.t, clip.r - 1, clip.b));
     }
 
-    leftRake.moveTo(leftRake.px, leftRake.py - 2);
+    leftRake.moveBy(0, -2);
 
     const leftBottom = leftRake.screenRect().b;
 

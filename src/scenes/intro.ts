@@ -155,7 +155,7 @@ export class IntroScene extends Scene {
     flake.setHome(x, y);
 
     for (const [dx, dy] of SNOW_DRIFTS) {
-      flake.newSequence(1);
+      flake.newSequence(1, true);
 
       for (let step = 0; step < 6; step++) {
         flake.addStepsMpx(0, 2, 1, dx, dy, 20);

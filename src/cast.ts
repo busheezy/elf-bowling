@@ -23,7 +23,9 @@ export interface Drawable {
   surface(): CastSurface;
 }
 
-const TEXT_RESOLUTION = 4;
+const MIN_TEXT_RESOLUTION = 4;
+const STAGE_WIDTH = 640;
+const STAGE_HEIGHT = 480;
 
 function createCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
@@ -34,13 +36,24 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   return canvas;
 }
 
+function textResolution(): number {
+  const pixelRatio = window.devicePixelRatio;
+  const screenWidth = window.screen.width * pixelRatio;
+  const screenHeight = window.screen.height * pixelRatio;
+  const fullscreenScale = Math.min(screenWidth / STAGE_WIDTH, screenHeight / STAGE_HEIGHT);
+  const resolution = Math.ceil(fullscreenScale);
+
+  return Math.max(MIN_TEXT_RESOLUTION, resolution);
+}
+
 function createTextContext(width: number, height: number): CanvasRenderingContext2D {
-  const canvasWidth = width * TEXT_RESOLUTION;
-  const canvasHeight = height * TEXT_RESOLUTION;
+  const resolution = textResolution();
+  const canvasWidth = width * resolution;
+  const canvasHeight = height * resolution;
   const canvas = createCanvas(canvasWidth, canvasHeight);
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-  context.scale(TEXT_RESOLUTION, TEXT_RESOLUTION);
+  context.scale(resolution, resolution);
 
   return context;
 }

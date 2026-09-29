@@ -572,7 +572,7 @@ export class GameScene extends Scene {
       return;
     }
 
-    ball.moveTo(x, y);
+    ball.moveBy(x - ball.px, 0);
 
     if (y < 331) {
       this.critters.deerHeadDown();
@@ -604,6 +604,7 @@ export class GameScene extends Scene {
     target.setCel(ball.cel);
     target.show();
     target.moveTo(x, y);
+    target.inheritTween(ball);
 
     return target;
   }
