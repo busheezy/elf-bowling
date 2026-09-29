@@ -159,6 +159,7 @@ export class QuarterCast implements Drawable {
   readonly hotspotY: number;
   private readonly full: BitmapCast;
   private readonly quarter: BitmapCast;
+  private readonly surfaces = new Map<number, CastSurface>();
 
   constructor(name: string, full: DecodedBitmap, quarter: DecodedBitmap) {
     this.name = name;
@@ -180,13 +181,22 @@ export class QuarterCast implements Drawable {
   }
 
   surface(): CastSurface {
+    const cached = this.surfaces.get(this.mode);
+
+    if (cached) {
+      return cached;
+    }
+
     const fullSurface = this.full.surface();
     const quarterSurface = this.quarter.surface();
     const canvas = fullSurface.canvas;
     const mask = quarterSurface.mask;
     const bbox = quarterSurface.bbox;
+    const created = { canvas, mask, bbox };
 
-    return { canvas, mask, bbox };
+    this.surfaces.set(this.mode, created);
+
+    return created;
   }
 }
 

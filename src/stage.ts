@@ -64,8 +64,6 @@ export class Stage {
   private modal: Modal | null = null;
   private readonly audio: AudioContext;
   private readonly context: CanvasRenderingContext2D;
-  private readonly frame: HTMLCanvasElement;
-  private readonly frameContext: CanvasRenderingContext2D;
   private readonly scenes = new Map<string, Scene>();
   private readonly layoutByName = new Map<string, LayoutRecord>();
   private current: Scene | null = null;
@@ -77,9 +75,7 @@ export class Stage {
     this.canvas = canvas;
     this.assets = assets;
     this.audio = audio;
-    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.frame = document.createElement("canvas");
-    this.frameContext = this.frame.getContext("2d") as CanvasRenderingContext2D;
+    this.context = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
     this.sound = new SoundManager(audio, assets, () => this.now);
 
     for (const record of assets.layout) {
@@ -279,36 +275,30 @@ export class Stage {
     const scene = this.current;
 
     this.syncResolution();
-    this.frameContext.fillStyle = "#000";
-    this.frameContext.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
+    this.context.fillStyle = "#000";
+    this.context.fillRect(0, 0, STAGE_WIDTH, STAGE_HEIGHT);
 
     if (!scene) {
-      this.presentFrame();
       return;
     }
 
     scene.logic();
     this.updateModal();
     this.updateCursor(scene);
-    scene.draw(this.frameContext);
-    this.presentFrame();
-  }
-
-  private presentFrame(): void {
-    const width = this.canvas.width;
-    const height = this.canvas.height;
-
-    this.context.setTransform(1, 0, 0, 1, 0, 0);
-    this.context.imageSmoothingEnabled = true;
-    this.context.imageSmoothingQuality = "high";
-    this.context.drawImage(this.frame, 0, 0, width, height);
+    scene.draw(this.context);
   }
 
   private syncResolution(): void {
     const rect = this.canvas.getBoundingClientRect();
     const pixelRatio = window.devicePixelRatio;
-    const width = Math.max(STAGE_WIDTH, Math.round(rect.width * pixelRatio));
-    const height = Math.max(STAGE_HEIGHT, Math.round(rect.height * pixelRatio));
+    const displayWidth = Math.round(rect.width * pixelRatio);
+    const displayHeight = Math.round(rect.height * pixelRatio);
+    const scaleX = displayWidth / STAGE_WIDTH;
+    const scaleY = displayHeight / STAGE_HEIGHT;
+    const largestScale = Math.max(1, scaleX, scaleY);
+    const renderScale = Math.ceil(largestScale);
+    const width = STAGE_WIDTH * renderScale;
+    const height = STAGE_HEIGHT * renderScale;
     const isResized = this.canvas.width !== width || this.canvas.height !== height;
 
     if (isResized) {
@@ -316,20 +306,8 @@ export class Stage {
       this.canvas.height = height;
     }
 
-    const scaleX = width / STAGE_WIDTH;
-    const scaleY = height / STAGE_HEIGHT;
-    const frameScale = Math.ceil(Math.max(scaleX, scaleY));
-    const frameWidth = STAGE_WIDTH * frameScale;
-    const frameHeight = STAGE_HEIGHT * frameScale;
-    const isFrameResized = this.frame.width !== frameWidth || this.frame.height !== frameHeight;
-
-    if (isFrameResized) {
-      this.frame.width = frameWidth;
-      this.frame.height = frameHeight;
-    }
-
-    this.frameContext.setTransform(frameScale, 0, 0, frameScale, 0, 0);
-    this.frameContext.imageSmoothingEnabled = false;
+    this.context.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+    this.context.imageSmoothingEnabled = false;
   }
 
   private toStage(event: PointerEvent): [number, number] {

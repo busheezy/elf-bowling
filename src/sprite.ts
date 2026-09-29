@@ -1,4 +1,4 @@
-import type { Drawable, Rect } from "./cast";
+import type { CastSurface, Drawable, Rect } from "./cast";
 import type { Scene } from "./scene";
 
 export type SpriteCallback = (sprite: Sprite) => void;
@@ -67,6 +67,53 @@ function snapToDevicePixels(context: CanvasRenderingContext2D, rect: Rect): Rect
   const b = Math.round(rect.b * scaleY) / scaleY;
 
   return { l, t, r, b };
+}
+
+const surfaceImages = new WeakMap<CastSurface, ImageBitmap>();
+
+function isNativeScale(surface: CastSurface, cast: Drawable): boolean {
+  const isNativeWidth = surface.canvas.width === cast.width;
+  const isNativeHeight = surface.canvas.height === cast.height;
+
+  return isNativeWidth && isNativeHeight;
+}
+
+function scaledLength(length: number, scale: number): number {
+  const scaled = Math.round(length * scale);
+
+  return Math.max(1, scaled);
+}
+
+function renderSurfaceImage(surface: CastSurface, width: number, height: number): ImageBitmap {
+  const canvas = new OffscreenCanvas(width, height);
+  const context = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D;
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(surface.canvas, 0, 0, width, height);
+
+  return canvas.transferToImageBitmap();
+}
+
+function surfaceImage(surface: CastSurface, cast: Drawable, scale: number): ImageBitmap {
+  const isNative = isNativeScale(surface, cast);
+  const imageScale = isNative ? 1 : scale;
+  const width = scaledLength(cast.width, imageScale);
+  const height = scaledLength(cast.height, imageScale);
+  const cached = surfaceImages.get(surface);
+  const isCachedCurrent = cached?.width === width && cached.height === height;
+
+  if (cached && isCachedCurrent) {
+    return cached;
+  }
+
+  cached?.close();
+
+  const created = renderSurfaceImage(surface, width, height);
+
+  surfaceImages.set(surface, created);
+
+  return created;
 }
 
 function advanceTime(current: number, now: number, ms: number): number {
@@ -946,23 +993,23 @@ export class Sprite {
       return;
     }
 
+    const transform = context.getTransform();
+    const image = surfaceImage(surface, cast, transform.a);
     const width = visibleArea.r - visibleArea.l;
     const height = visibleArea.b - visibleArea.t;
-    const scaleX = surface.canvas.width / cast.width;
-    const scaleY = surface.canvas.height / cast.height;
+    const scaleX = image.width / cast.width;
+    const scaleY = image.height / cast.height;
     const sourceX = (visibleArea.l - offsetX) * scaleX;
     const sourceY = (visibleArea.t - offsetY) * scaleY;
     const sourceWidth = width * scaleX;
     const sourceHeight = height * scaleY;
-    const isScaled = scaleX !== 1 || scaleY !== 1;
     const target = snapToDevicePixels(context, visibleArea);
     const targetWidth = target.r - target.l;
     const targetHeight = target.b - target.t;
 
-    context.imageSmoothingEnabled = isScaled;
-    context.imageSmoothingQuality = "high";
+    context.imageSmoothingEnabled = false;
     context.drawImage(
-      surface.canvas,
+      image,
       sourceX,
       sourceY,
       sourceWidth,
