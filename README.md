@@ -7,11 +7,11 @@ Play it at https://busheezy.github.io/elf-bowling/
 ## Running locally
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-`npm run build` type-checks and writes a static build to `dist/`. Pushing to `main` deploys it to GitHub Pages.
+`pnpm build` type-checks and writes a static build to `dist/`. Pushing to `main` deploys it to GitHub Pages.
 
 ## Controls
 
