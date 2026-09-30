@@ -22,6 +22,8 @@ interface BackgroundLoop {
 const DEFAULT_TALK_INTERVAL = 160;
 const BACKGROUND_PRIORITY = 1;
 const MUTED_KEY = "elf-bowling-muted";
+const VOLUME_KEY = "elf-bowling-volume";
+const DEFAULT_VOLUME = 0.5;
 
 function readMuted(): boolean {
   try {
@@ -43,12 +45,56 @@ function storeMuted(muted: boolean): void {
   }
 }
 
+function readVolume(): number {
+  try {
+    const stored = localStorage.getItem(VOLUME_KEY);
+
+    if (stored === null) {
+      return DEFAULT_VOLUME;
+    }
+
+    const volume = Number(stored);
+
+    if (Number.isNaN(volume)) {
+      return DEFAULT_VOLUME;
+    }
+
+    return volume;
+  } catch {
+    return DEFAULT_VOLUME;
+  }
+}
+
+function storeVolume(volume: number): void {
+  const value = String(volume);
+
+  try {
+    localStorage.setItem(VOLUME_KEY, value);
+  } catch {
+    return;
+  }
+}
+
+function createCompressor(audio: AudioContext): DynamicsCompressorNode {
+  const compressor = audio.createDynamicsCompressor();
+
+  compressor.threshold.value = -30;
+  compressor.knee.value = 12;
+  compressor.ratio.value = 8;
+  compressor.attack.value = 0.003;
+  compressor.release.value = 0.25;
+
+  return compressor;
+}
+
 export class SoundManager {
   private readonly audio: AudioContext;
   private readonly assets: Assets;
   private readonly clock: () => number;
+  private readonly input: DynamicsCompressorNode;
   private readonly output: GainNode;
   private muted = readMuted();
+  private volume = readVolume();
   private current: Playing | null = null;
   private background: BackgroundLoop | null = null;
 
@@ -56,7 +102,9 @@ export class SoundManager {
     this.audio = audio;
     this.assets = assets;
     this.clock = clock;
+    this.input = createCompressor(audio);
     this.output = audio.createGain();
+    this.input.connect(this.output);
     this.output.connect(audio.destination);
     this.applyVolume();
   }
@@ -67,8 +115,18 @@ export class SoundManager {
     this.applyVolume();
   }
 
+  get currentVolume(): number {
+    return this.volume;
+  }
+
+  setVolume(volume: number): void {
+    this.volume = volume;
+    storeVolume(volume);
+    this.applyVolume();
+  }
+
   private applyVolume(): void {
-    const volume = this.muted ? 0 : 1;
+    const volume = this.muted ? 0 : this.volume;
 
     this.output.gain.value = volume;
   }
@@ -187,7 +245,7 @@ export class SoundManager {
     const endsAt = this.clock() + durationMs;
 
     source.buffer = buffer;
-    source.connect(this.output);
+    source.connect(this.input);
     source.start();
 
     this.current = { source, priority, scene, sprite, onDone, talking, endsAt };

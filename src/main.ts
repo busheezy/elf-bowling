@@ -11,6 +11,7 @@ import { Stage } from "./stage";
 const canvas = document.getElementById("stage") as HTMLCanvasElement;
 const overlay = document.getElementById("overlay") as HTMLDivElement;
 const message = document.getElementById("message") as HTMLParagraphElement;
+const volumeSlider = document.getElementById("volume") as HTMLInputElement;
 
 function showMessage(text: string): void {
   message.textContent = text;
@@ -40,6 +41,17 @@ async function boot(): Promise<void> {
   overlay.hidden = true;
 
   const stage = new Stage(canvas, assets, audio);
+  const initialVolume = stage.sound.currentVolume;
+
+  volumeSlider.value = String(initialVolume);
+  volumeSlider.addEventListener("input", () => {
+    const volume = volumeSlider.valueAsNumber;
+
+    stage.sound.setVolume(volume);
+  });
+  volumeSlider.addEventListener("change", () => {
+    volumeSlider.blur();
+  });
   const scenes = [
     new PreIntroScene(stage, "PreIntro", 100),
     new IntroScene(stage, "Intro", 100),

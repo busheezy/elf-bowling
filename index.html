@@ -37,6 +37,18 @@
         background: #000;
         font-size: 24px;
       }
+      #volume {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        width: 120px;
+        opacity: 0.4;
+        accent-color: #c00;
+      }
+      #volume:hover,
+      #volume:focus-visible {
+        opacity: 1;
+      }
       #overlay[hidden] {
         display: none;
       }
@@ -47,6 +59,7 @@
       <canvas id="stage" width="640" height="480"></canvas>
       <div id="overlay"><p id="message"></p></div>
     </div>
+    <input id="volume" type="range" min="0" max="1" step="0.01" aria-label="Volume" />
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
