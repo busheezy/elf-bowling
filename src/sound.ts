@@ -78,10 +78,10 @@ function storeVolume(volume: number): void {
 function createCompressor(audio: AudioContext): DynamicsCompressorNode {
   const compressor = audio.createDynamicsCompressor();
 
-  compressor.threshold.value = -30;
-  compressor.knee.value = 12;
-  compressor.ratio.value = 8;
-  compressor.attack.value = 0.003;
+  compressor.threshold.value = -50;
+  compressor.knee.value = 6;
+  compressor.ratio.value = 20;
+  compressor.attack.value = 0.001;
   compressor.release.value = 0.25;
 
   return compressor;
