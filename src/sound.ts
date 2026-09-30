@@ -24,6 +24,7 @@ const BACKGROUND_PRIORITY = 1;
 const MUTED_KEY = "elf-bowling-muted";
 const VOLUME_KEY = "elf-bowling-volume";
 const DEFAULT_VOLUME = 0.5;
+const ENHANCED_KEY = "elf-bowling-enhanced";
 
 function readMuted(): boolean {
   try {
@@ -65,6 +66,26 @@ function readVolume(): number {
   }
 }
 
+function readEnhanced(): boolean {
+  try {
+    const stored = localStorage.getItem(ENHANCED_KEY);
+
+    return stored !== "0";
+  } catch {
+    return true;
+  }
+}
+
+function storeEnhanced(enhanced: boolean): void {
+  const value = enhanced ? "1" : "0";
+
+  try {
+    localStorage.setItem(ENHANCED_KEY, value);
+  } catch {
+    return;
+  }
+}
+
 function storeVolume(volume: number): void {
   const value = String(volume);
 
@@ -75,26 +96,14 @@ function storeVolume(volume: number): void {
   }
 }
 
-function createCompressor(audio: AudioContext): DynamicsCompressorNode {
-  const compressor = audio.createDynamicsCompressor();
-
-  compressor.threshold.value = -50;
-  compressor.knee.value = 6;
-  compressor.ratio.value = 20;
-  compressor.attack.value = 0.001;
-  compressor.release.value = 0.25;
-
-  return compressor;
-}
-
 export class SoundManager {
   private readonly audio: AudioContext;
   private readonly assets: Assets;
   private readonly clock: () => number;
-  private readonly input: DynamicsCompressorNode;
   private readonly output: GainNode;
   private muted = readMuted();
   private volume = readVolume();
+  private enhanced = readEnhanced();
   private current: Playing | null = null;
   private background: BackgroundLoop | null = null;
 
@@ -102,9 +111,7 @@ export class SoundManager {
     this.audio = audio;
     this.assets = assets;
     this.clock = clock;
-    this.input = createCompressor(audio);
     this.output = audio.createGain();
-    this.input.connect(this.output);
     this.output.connect(audio.destination);
     this.applyVolume();
   }
@@ -123,6 +130,15 @@ export class SoundManager {
     this.volume = volume;
     storeVolume(volume);
     this.applyVolume();
+  }
+
+  get isEnhanced(): boolean {
+    return this.enhanced;
+  }
+
+  setEnhanced(enhanced: boolean): void {
+    this.enhanced = enhanced;
+    storeEnhanced(enhanced);
   }
 
   private applyVolume(): void {
@@ -239,13 +255,13 @@ export class SoundManager {
     onDone: SoundCallback,
     talking: boolean,
   ): void {
-    const buffer = this.assets.sound(name);
+    const buffer = this.assets.sound(name, this.enhanced);
     const source = this.audio.createBufferSource();
     const durationMs = buffer.duration * 1000;
     const endsAt = this.clock() + durationMs;
 
     source.buffer = buffer;
-    source.connect(this.input);
+    source.connect(this.output);
     source.start();
 
     this.current = { source, priority, scene, sprite, onDone, talking, endsAt };

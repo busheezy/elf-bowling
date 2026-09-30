@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "oxlint src",
     "format": "oxfmt src index.html",
+    "enhance-audio": "node scripts/enhance-audio.mjs",
     "format:check": "oxfmt --check src index.html"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@ const canvas = document.getElementById("stage") as HTMLCanvasElement;
 const overlay = document.getElementById("overlay") as HTMLDivElement;
 const message = document.getElementById("message") as HTMLParagraphElement;
 const volumeSlider = document.getElementById("volume") as HTMLInputElement;
+const enhancedToggle = document.getElementById("enhanced") as HTMLInputElement;
 
 function showMessage(text: string): void {
   message.textContent = text;
@@ -51,6 +52,16 @@ async function boot(): Promise<void> {
   });
   volumeSlider.addEventListener("change", () => {
     volumeSlider.blur();
+  });
+
+  const initialEnhanced = stage.sound.isEnhanced;
+
+  enhancedToggle.checked = initialEnhanced;
+  enhancedToggle.addEventListener("change", () => {
+    const enhanced = enhancedToggle.checked;
+
+    stage.sound.setEnhanced(enhanced);
+    enhancedToggle.blur();
   });
   const scenes = [
     new PreIntroScene(stage, "PreIntro", 100),

@@ -9,6 +9,13 @@ const assetUrls = import.meta.glob<string>("./assets/*.{bmp,wav}", {
   eager: true,
 });
 
+const enhancedSoundUrls = import.meta.glob<string>("./assets/enhanced/*.wav", {
+  query: "?url",
+  import: "default",
+  eager: true,
+});
+
+const ENHANCED_DIR = "/enhanced/";
 const QUARTER_PREFIX = "#";
 const COPY_PREFIX = "~";
 const QUARTER_FACTOR = 4;
@@ -52,6 +59,7 @@ export class Assets {
   private readonly bitmaps = new Map<string, DecodedBitmap>();
   private readonly casts = new Map<string, Drawable>();
   private readonly sounds = new Map<string, AudioBuffer>();
+  private readonly enhancedSounds = new Map<string, AudioBuffer>();
 
   private constructor(embedded: EmbeddedData) {
     this.layout = embedded.layout;
@@ -60,15 +68,15 @@ export class Assets {
 
   static async load(audio: AudioContext, onProgress: (fraction: number) => void): Promise<Assets> {
     const assets = new Assets(embeddedData as EmbeddedData);
-    const entries = Object.entries(assetUrls);
+    const assetEntries = Object.entries(assetUrls);
+    const enhancedEntries = Object.entries(enhancedSoundUrls);
+    const entries = [...assetEntries, ...enhancedEntries];
     const total = entries.length;
     const loaded = new Set<string>();
 
     const loadOne = async ([path, url]: [string, string]) => {
-      const file = fileNameOf(path);
-
-      await assets.loadAsset(audio, file, url);
-      loaded.add(file);
+      await assets.loadAsset(audio, path, url);
+      loaded.add(path);
       onProgress(loaded.size / total);
     };
 
@@ -79,7 +87,8 @@ export class Assets {
     return assets;
   }
 
-  private async loadAsset(audio: AudioContext, file: string, url: string): Promise<void> {
+  private async loadAsset(audio: AudioContext, path: string, url: string): Promise<void> {
+    const file = fileNameOf(path);
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -91,8 +100,10 @@ export class Assets {
 
     if (isSound) {
       const decoded = await audio.decodeAudioData(buffer);
+      const isEnhanced = path.includes(ENHANCED_DIR);
+      const sounds = isEnhanced ? this.enhancedSounds : this.sounds;
 
-      this.sounds.set(file, decoded);
+      sounds.set(file, decoded);
       return;
     }
 
@@ -162,9 +173,10 @@ export class Assets {
     throw new Error(`AddCast - cannot find cast ${key}`);
   }
 
-  sound(name: string): AudioBuffer {
+  sound(name: string, enhanced: boolean): AudioBuffer {
     const key = name.toLowerCase();
-    const buffer = this.sounds.get(key);
+    const sounds = enhanced ? this.enhancedSounds : this.sounds;
+    const buffer = sounds.get(key);
 
     if (!buffer) {
       throw new Error(`Could not find sound ${name}`);
